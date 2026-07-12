@@ -12,62 +12,6 @@ import type { Voiceover } from "./audio_pb";
 export declare const file_coasterai_core_v1_slide: GenFile;
 
 /**
- * Mostly be used for debugging what AI created
- * Useful for rerunning the generation
- * selectedTemplateDescription is basically the prompt generated to created the animation
- * in case of existing template selectedTemplateDescription = template description
- *
- * @generated from message coasterai.core.v1.AnimationSlidePlan
- */
-export declare type AnimationSlidePlan = Message<"coasterai.core.v1.AnimationSlidePlan"> & {
-  /**
-   * @generated from field: int64 index = 1;
-   */
-  index: bigint;
-
-  /**
-   * @generated from field: string beatDescription = 2;
-   */
-  beatDescription: string;
-
-  /**
-   * @generated from field: string animationType = 3;
-   */
-  animationType: string;
-
-  /**
-   * @generated from field: string categorySearcQquery = 4;
-   */
-  categorySearcQquery: string;
-
-  /**
-   * @generated from field: int64 durationInFrames = 5;
-   */
-  durationInFrames: bigint;
-
-  /**
-   * @generated from field: optional string voiceover = 6;
-   */
-  voiceover?: string;
-
-  /**
-   * @generated from field: optional string selectedTemplateDescription = 7;
-   */
-  selectedTemplateDescription?: string;
-
-  /**
-   * @generated from field: optional string thinking_summary = 8;
-   */
-  thinkingSummary?: string;
-};
-
-/**
- * Describes the message coasterai.core.v1.AnimationSlidePlan.
- * Use `create(AnimationSlidePlanSchema)` to create a new message.
- */
-export declare const AnimationSlidePlanSchema: GenMessage<AnimationSlidePlan>;
-
-/**
  * @generated from message coasterai.core.v1.MetaData
  */
 export declare type MetaData = Message<"coasterai.core.v1.MetaData"> & {
@@ -118,19 +62,9 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
   codeRegistry?: CodeRegistry;
 
   /**
-   * @generated from field: coasterai.core.v1.AnimationSlidePlan plan = 2;
-   */
-  plan?: AnimationSlidePlan;
-
-  /**
    * @generated from field: google.protobuf.Struct edits = 3;
    */
   edits?: JsonObject;
-
-  /**
-   * @generated from field: repeated coasterai.core.v1.CodeRegistry history = 4;
-   */
-  history: CodeRegistry[];
 };
 
 /**
@@ -345,11 +279,6 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   id: string;
 
   /**
-   * @generated from field: string transcript = 3;
-   */
-  transcript: string;
-
-  /**
    * @generated from field: coasterai.core.v1.TransitionType transition = 5;
    */
   transition: TransitionType;
@@ -398,11 +327,6 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    * @generated from field: repeated coasterai.core.v1.ZoomEffect zooms = 20;
    */
   zooms: ZoomEffect[];
-
-  /**
-   * @generated from field: google.protobuf.Struct plan = 21;
-   */
-  plan?: JsonObject;
 
   /**
    * @generated from field: coasterai.core.v1.SlideStatus slideStatus = 22;

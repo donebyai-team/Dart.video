@@ -486,110 +486,6 @@ func (BackgroundEffectType) EnumDescriptor() ([]byte, []int) {
 	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{7}
 }
 
-// Mostly be used for debugging what AI created
-// Useful for rerunning the generation
-// selectedTemplateDescription is basically the prompt generated to created the animation
-// in case of existing template selectedTemplateDescription = template description
-type AnimationSlidePlan struct {
-	state                       protoimpl.MessageState `protogen:"open.v1"`
-	Index                       int64                  `protobuf:"varint,1,opt,name=index,proto3" json:"index,omitempty"`
-	BeatDescription             string                 `protobuf:"bytes,2,opt,name=beatDescription,proto3" json:"beatDescription,omitempty"`
-	AnimationType               string                 `protobuf:"bytes,3,opt,name=animationType,proto3" json:"animationType,omitempty"`
-	CategorySearcQquery         string                 `protobuf:"bytes,4,opt,name=categorySearcQquery,proto3" json:"categorySearcQquery,omitempty"`
-	DurationInFrames            int64                  `protobuf:"varint,5,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
-	Voiceover                   *string                `protobuf:"bytes,6,opt,name=voiceover,proto3,oneof" json:"voiceover,omitempty"`
-	SelectedTemplateDescription *string                `protobuf:"bytes,7,opt,name=selectedTemplateDescription,proto3,oneof" json:"selectedTemplateDescription,omitempty"`
-	ThinkingSummary             *string                `protobuf:"bytes,8,opt,name=thinking_summary,json=thinkingSummary,proto3,oneof" json:"thinking_summary,omitempty"`
-	unknownFields               protoimpl.UnknownFields
-	sizeCache                   protoimpl.SizeCache
-}
-
-func (x *AnimationSlidePlan) Reset() {
-	*x = AnimationSlidePlan{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AnimationSlidePlan) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AnimationSlidePlan) ProtoMessage() {}
-
-func (x *AnimationSlidePlan) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AnimationSlidePlan.ProtoReflect.Descriptor instead.
-func (*AnimationSlidePlan) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *AnimationSlidePlan) GetIndex() int64 {
-	if x != nil {
-		return x.Index
-	}
-	return 0
-}
-
-func (x *AnimationSlidePlan) GetBeatDescription() string {
-	if x != nil {
-		return x.BeatDescription
-	}
-	return ""
-}
-
-func (x *AnimationSlidePlan) GetAnimationType() string {
-	if x != nil {
-		return x.AnimationType
-	}
-	return ""
-}
-
-func (x *AnimationSlidePlan) GetCategorySearcQquery() string {
-	if x != nil {
-		return x.CategorySearcQquery
-	}
-	return ""
-}
-
-func (x *AnimationSlidePlan) GetDurationInFrames() int64 {
-	if x != nil {
-		return x.DurationInFrames
-	}
-	return 0
-}
-
-func (x *AnimationSlidePlan) GetVoiceover() string {
-	if x != nil && x.Voiceover != nil {
-		return *x.Voiceover
-	}
-	return ""
-}
-
-func (x *AnimationSlidePlan) GetSelectedTemplateDescription() string {
-	if x != nil && x.SelectedTemplateDescription != nil {
-		return *x.SelectedTemplateDescription
-	}
-	return ""
-}
-
-func (x *AnimationSlidePlan) GetThinkingSummary() string {
-	if x != nil && x.ThinkingSummary != nil {
-		return *x.ThinkingSummary
-	}
-	return ""
-}
-
 type MetaData struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	X             float32                `protobuf:"fixed32,2,opt,name=x,proto3" json:"x,omitempty"`
@@ -604,7 +500,7 @@ type MetaData struct {
 
 func (x *MetaData) Reset() {
 	*x = MetaData{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[1]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -616,7 +512,7 @@ func (x *MetaData) String() string {
 func (*MetaData) ProtoMessage() {}
 
 func (x *MetaData) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[1]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -629,7 +525,7 @@ func (x *MetaData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetaData.ProtoReflect.Descriptor instead.
 func (*MetaData) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{1}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *MetaData) GetX() float32 {
@@ -677,16 +573,14 @@ func (x *MetaData) GetRotation() float32 {
 type AnimationSlideContent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CodeRegistry  *CodeRegistry          `protobuf:"bytes,1,opt,name=codeRegistry,proto3" json:"codeRegistry,omitempty"`
-	Plan          *AnimationSlidePlan    `protobuf:"bytes,2,opt,name=plan,proto3" json:"plan,omitempty"`
 	Edits         *structpb.Struct       `protobuf:"bytes,3,opt,name=edits,proto3" json:"edits,omitempty"`
-	History       []*CodeRegistry        `protobuf:"bytes,4,rep,name=history,proto3" json:"history,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AnimationSlideContent) Reset() {
 	*x = AnimationSlideContent{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[2]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -698,7 +592,7 @@ func (x *AnimationSlideContent) String() string {
 func (*AnimationSlideContent) ProtoMessage() {}
 
 func (x *AnimationSlideContent) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[2]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -711,7 +605,7 @@ func (x *AnimationSlideContent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AnimationSlideContent.ProtoReflect.Descriptor instead.
 func (*AnimationSlideContent) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{2}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *AnimationSlideContent) GetCodeRegistry() *CodeRegistry {
@@ -721,23 +615,9 @@ func (x *AnimationSlideContent) GetCodeRegistry() *CodeRegistry {
 	return nil
 }
 
-func (x *AnimationSlideContent) GetPlan() *AnimationSlidePlan {
-	if x != nil {
-		return x.Plan
-	}
-	return nil
-}
-
 func (x *AnimationSlideContent) GetEdits() *structpb.Struct {
 	if x != nil {
 		return x.Edits
-	}
-	return nil
-}
-
-func (x *AnimationSlideContent) GetHistory() []*CodeRegistry {
-	if x != nil {
-		return x.History
 	}
 	return nil
 }
@@ -755,7 +635,7 @@ type CodeRegistry struct {
 
 func (x *CodeRegistry) Reset() {
 	*x = CodeRegistry{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[3]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -767,7 +647,7 @@ func (x *CodeRegistry) String() string {
 func (*CodeRegistry) ProtoMessage() {}
 
 func (x *CodeRegistry) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[3]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -780,7 +660,7 @@ func (x *CodeRegistry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CodeRegistry.ProtoReflect.Descriptor instead.
 func (*CodeRegistry) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{3}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CodeRegistry) GetMUrl() string {
@@ -835,7 +715,7 @@ type SpotlightEffect struct {
 
 func (x *SpotlightEffect) Reset() {
 	*x = SpotlightEffect{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[4]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -847,7 +727,7 @@ func (x *SpotlightEffect) String() string {
 func (*SpotlightEffect) ProtoMessage() {}
 
 func (x *SpotlightEffect) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[4]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -860,7 +740,7 @@ func (x *SpotlightEffect) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SpotlightEffect.ProtoReflect.Descriptor instead.
 func (*SpotlightEffect) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{4}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *SpotlightEffect) GetId() string {
@@ -944,7 +824,7 @@ type CalloutEffect struct {
 
 func (x *CalloutEffect) Reset() {
 	*x = CalloutEffect{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[5]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -956,7 +836,7 @@ func (x *CalloutEffect) String() string {
 func (*CalloutEffect) ProtoMessage() {}
 
 func (x *CalloutEffect) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[5]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -969,7 +849,7 @@ func (x *CalloutEffect) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CalloutEffect.ProtoReflect.Descriptor instead.
 func (*CalloutEffect) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{5}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CalloutEffect) GetId() string {
@@ -1056,7 +936,7 @@ type ZoomEffect struct {
 
 func (x *ZoomEffect) Reset() {
 	*x = ZoomEffect{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[6]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1068,7 +948,7 @@ func (x *ZoomEffect) String() string {
 func (*ZoomEffect) ProtoMessage() {}
 
 func (x *ZoomEffect) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[6]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1081,7 +961,7 @@ func (x *ZoomEffect) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ZoomEffect.ProtoReflect.Descriptor instead.
 func (*ZoomEffect) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{6}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ZoomEffect) GetId() string {
@@ -1129,7 +1009,6 @@ func (x *ZoomEffect) GetEndFrame() float32 {
 type Slide struct {
 	state                      protoimpl.MessageState `protogen:"open.v1"`
 	Id                         string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Transcript                 string                 `protobuf:"bytes,3,opt,name=transcript,proto3" json:"transcript,omitempty"`
 	Transition                 TransitionType         `protobuf:"varint,5,opt,name=transition,proto3,enum=coasterai.core.v1.TransitionType" json:"transition,omitempty"`
 	TransitionDurationInFrames *int32                 `protobuf:"varint,6,opt,name=transitionDurationInFrames,proto3,oneof" json:"transitionDurationInFrames,omitempty"`
 	BackgroundStyle            *BackgroundStyle       `protobuf:"bytes,7,opt,name=background_style,json=backgroundStyle,proto3,oneof" json:"background_style,omitempty"`
@@ -1140,7 +1019,6 @@ type Slide struct {
 	Spotlights                 []*SpotlightEffect     `protobuf:"bytes,18,rep,name=spotlights,proto3" json:"spotlights,omitempty"`
 	Callouts                   []*CalloutEffect       `protobuf:"bytes,19,rep,name=callouts,proto3" json:"callouts,omitempty"`
 	Zooms                      []*ZoomEffect          `protobuf:"bytes,20,rep,name=zooms,proto3" json:"zooms,omitempty"`
-	Plan                       *structpb.Struct       `protobuf:"bytes,21,opt,name=plan,proto3" json:"plan,omitempty"`
 	SlideStatus                SlideStatus            `protobuf:"varint,22,opt,name=slideStatus,proto3,enum=coasterai.core.v1.SlideStatus" json:"slideStatus,omitempty"`
 	Index                      int32                  `protobuf:"varint,24,opt,name=index,proto3" json:"index,omitempty"`
 	Tid                        string                 `protobuf:"bytes,27,opt,name=tid,proto3" json:"tid,omitempty"` // Template ID
@@ -1151,7 +1029,7 @@ type Slide struct {
 
 func (x *Slide) Reset() {
 	*x = Slide{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[7]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1163,7 +1041,7 @@ func (x *Slide) String() string {
 func (*Slide) ProtoMessage() {}
 
 func (x *Slide) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[7]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1176,19 +1054,12 @@ func (x *Slide) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Slide.ProtoReflect.Descriptor instead.
 func (*Slide) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{7}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Slide) GetId() string {
 	if x != nil {
 		return x.Id
-	}
-	return ""
-}
-
-func (x *Slide) GetTranscript() string {
-	if x != nil {
-		return x.Transcript
 	}
 	return ""
 }
@@ -1263,13 +1134,6 @@ func (x *Slide) GetZooms() []*ZoomEffect {
 	return nil
 }
 
-func (x *Slide) GetPlan() *structpb.Struct {
-	if x != nil {
-		return x.Plan
-	}
-	return nil
-}
-
 func (x *Slide) GetSlideStatus() SlideStatus {
 	if x != nil {
 		return x.SlideStatus
@@ -1316,7 +1180,7 @@ type BackgroundStyle struct {
 
 func (x *BackgroundStyle) Reset() {
 	*x = BackgroundStyle{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[8]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1328,7 +1192,7 @@ func (x *BackgroundStyle) String() string {
 func (*BackgroundStyle) ProtoMessage() {}
 
 func (x *BackgroundStyle) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[8]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1341,7 +1205,7 @@ func (x *BackgroundStyle) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackgroundStyle.ProtoReflect.Descriptor instead.
 func (*BackgroundStyle) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{8}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *BackgroundStyle) GetStyle() isBackgroundStyle_Style {
@@ -1437,7 +1301,7 @@ type BackgroundEffect struct {
 
 func (x *BackgroundEffect) Reset() {
 	*x = BackgroundEffect{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[9]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1449,7 +1313,7 @@ func (x *BackgroundEffect) String() string {
 func (*BackgroundEffect) ProtoMessage() {}
 
 func (x *BackgroundEffect) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[9]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1462,7 +1326,7 @@ func (x *BackgroundEffect) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackgroundEffect.ProtoReflect.Descriptor instead.
 func (*BackgroundEffect) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{9}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *BackgroundEffect) GetType() BackgroundEffectType {
@@ -1481,7 +1345,7 @@ type SolidColor struct {
 
 func (x *SolidColor) Reset() {
 	*x = SolidColor{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[10]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1493,7 +1357,7 @@ func (x *SolidColor) String() string {
 func (*SolidColor) ProtoMessage() {}
 
 func (x *SolidColor) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[10]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1506,7 +1370,7 @@ func (x *SolidColor) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SolidColor.ProtoReflect.Descriptor instead.
 func (*SolidColor) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{10}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SolidColor) GetHex() string {
@@ -1525,7 +1389,7 @@ type BackgroundImage struct {
 
 func (x *BackgroundImage) Reset() {
 	*x = BackgroundImage{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[11]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1537,7 +1401,7 @@ func (x *BackgroundImage) String() string {
 func (*BackgroundImage) ProtoMessage() {}
 
 func (x *BackgroundImage) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[11]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1550,7 +1414,7 @@ func (x *BackgroundImage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackgroundImage.ProtoReflect.Descriptor instead.
 func (*BackgroundImage) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{11}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *BackgroundImage) GetUrl() string {
@@ -1571,7 +1435,7 @@ type Gradient struct {
 
 func (x *Gradient) Reset() {
 	*x = Gradient{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[12]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1583,7 +1447,7 @@ func (x *Gradient) String() string {
 func (*Gradient) ProtoMessage() {}
 
 func (x *Gradient) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[12]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1596,7 +1460,7 @@ func (x *Gradient) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Gradient.ProtoReflect.Descriptor instead.
 func (*Gradient) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{12}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Gradient) GetType() GradientType {
@@ -1630,7 +1494,7 @@ type GradientStop struct {
 
 func (x *GradientStop) Reset() {
 	*x = GradientStop{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[13]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1642,7 +1506,7 @@ func (x *GradientStop) String() string {
 func (*GradientStop) ProtoMessage() {}
 
 func (x *GradientStop) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[13]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1655,7 +1519,7 @@ func (x *GradientStop) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GradientStop.ProtoReflect.Descriptor instead.
 func (*GradientStop) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{13}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GradientStop) GetColor() string {
@@ -1686,7 +1550,7 @@ type Section struct {
 
 func (x *Section) Reset() {
 	*x = Section{}
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[14]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1698,7 +1562,7 @@ func (x *Section) String() string {
 func (*Section) ProtoMessage() {}
 
 func (x *Section) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_slide_proto_msgTypes[14]
+	mi := &file_coasterai_core_v1_slide_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1711,7 +1575,7 @@ func (x *Section) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Section.ProtoReflect.Descriptor instead.
 func (*Section) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{14}
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Section) GetId() string {
@@ -1760,20 +1624,7 @@ var File_coasterai_core_v1_slide_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcoasterai/core/v1/slide.proto\x12\x11coasterai.core.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1dcoasterai/core/v1/audio.proto\"\xb5\x03\n" +
-	"\x12AnimationSlidePlan\x12\x14\n" +
-	"\x05index\x18\x01 \x01(\x03R\x05index\x12(\n" +
-	"\x0fbeatDescription\x18\x02 \x01(\tR\x0fbeatDescription\x12$\n" +
-	"\ranimationType\x18\x03 \x01(\tR\ranimationType\x120\n" +
-	"\x13categorySearcQquery\x18\x04 \x01(\tR\x13categorySearcQquery\x12*\n" +
-	"\x10durationInFrames\x18\x05 \x01(\x03R\x10durationInFrames\x12!\n" +
-	"\tvoiceover\x18\x06 \x01(\tH\x00R\tvoiceover\x88\x01\x01\x12E\n" +
-	"\x1bselectedTemplateDescription\x18\a \x01(\tH\x01R\x1bselectedTemplateDescription\x88\x01\x01\x12.\n" +
-	"\x10thinking_summary\x18\b \x01(\tH\x02R\x0fthinkingSummary\x88\x01\x01B\f\n" +
-	"\n" +
-	"_voiceoverB\x1e\n" +
-	"\x1c_selectedTemplateDescriptionB\x13\n" +
-	"\x11_thinking_summary\"\xa7\x01\n" +
+	"\x1dcoasterai/core/v1/slide.proto\x12\x11coasterai.core.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1dcoasterai/core/v1/audio.proto\"\xa7\x01\n" +
 	"\bMetaData\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x02R\x01y\x12\x14\n" +
@@ -1782,12 +1633,10 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x05scale\x18\x06 \x01(\x02H\x00R\x05scale\x88\x01\x01\x12\x1f\n" +
 	"\brotation\x18\a \x01(\x02H\x01R\brotation\x88\x01\x01B\b\n" +
 	"\x06_scaleB\v\n" +
-	"\t_rotation\"\x81\x02\n" +
+	"\t_rotation\"\x8b\x01\n" +
 	"\x15AnimationSlideContent\x12C\n" +
-	"\fcodeRegistry\x18\x01 \x01(\v2\x1f.coasterai.core.v1.CodeRegistryR\fcodeRegistry\x129\n" +
-	"\x04plan\x18\x02 \x01(\v2%.coasterai.core.v1.AnimationSlidePlanR\x04plan\x12-\n" +
-	"\x05edits\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x05edits\x129\n" +
-	"\ahistory\x18\x04 \x03(\v2\x1f.coasterai.core.v1.CodeRegistryR\ahistory\"\xcf\x01\n" +
+	"\fcodeRegistry\x18\x01 \x01(\v2\x1f.coasterai.core.v1.CodeRegistryR\fcodeRegistry\x12-\n" +
+	"\x05edits\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x05edits\"\xcf\x01\n" +
 	"\fCodeRegistry\x12\x12\n" +
 	"\x04mUrl\x18\x01 \x01(\tR\x04mUrl\x12\x12\n" +
 	"\x04tUrl\x18\x02 \x01(\tR\x04tUrl\x12\x12\n" +
@@ -1835,12 +1684,9 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\n" +
 	"startFrame\x18\x05 \x01(\x02R\n" +
 	"startFrame\x12\x1a\n" +
-	"\bendFrame\x18\x06 \x01(\x02R\bendFrame\"\xbe\a\n" +
+	"\bendFrame\x18\x06 \x01(\x02R\bendFrame\"\xf1\x06\n" +
 	"\x05Slide\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
-	"\n" +
-	"transcript\x18\x03 \x01(\tR\n" +
-	"transcript\x12A\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12A\n" +
 	"\n" +
 	"transition\x18\x05 \x01(\x0e2!.coasterai.core.v1.TransitionTypeR\n" +
 	"transition\x12C\n" +
@@ -1854,8 +1700,7 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"spotlights\x18\x12 \x03(\v2\".coasterai.core.v1.SpotlightEffectR\n" +
 	"spotlights\x12<\n" +
 	"\bcallouts\x18\x13 \x03(\v2 .coasterai.core.v1.CalloutEffectR\bcallouts\x123\n" +
-	"\x05zooms\x18\x14 \x03(\v2\x1d.coasterai.core.v1.ZoomEffectR\x05zooms\x12+\n" +
-	"\x04plan\x18\x15 \x01(\v2\x17.google.protobuf.StructR\x04plan\x12@\n" +
+	"\x05zooms\x18\x14 \x03(\v2\x1d.coasterai.core.v1.ZoomEffectR\x05zooms\x12@\n" +
 	"\vslideStatus\x18\x16 \x01(\x0e2\x1e.coasterai.core.v1.SlideStatusR\vslideStatus\x12\x14\n" +
 	"\x05index\x18\x18 \x01(\x05R\x05index\x12\x10\n" +
 	"\x03tid\x18\x1b \x01(\tR\x03tid\x12:\n" +
@@ -1969,7 +1814,7 @@ func file_coasterai_core_v1_slide_proto_rawDescGZIP() []byte {
 }
 
 var file_coasterai_core_v1_slide_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
-var file_coasterai_core_v1_slide_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_coasterai_core_v1_slide_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_coasterai_core_v1_slide_proto_goTypes = []any{
 	(SlideStatus)(0),              // 0: coasterai.core.v1.SlideStatus
 	(StackAnimationMode)(0),       // 1: coasterai.core.v1.StackAnimationMode
@@ -1979,55 +1824,51 @@ var file_coasterai_core_v1_slide_proto_goTypes = []any{
 	(GradientType)(0),             // 5: coasterai.core.v1.GradientType
 	(BackgroundPattern)(0),        // 6: coasterai.core.v1.BackgroundPattern
 	(BackgroundEffectType)(0),     // 7: coasterai.core.v1.BackgroundEffectType
-	(*AnimationSlidePlan)(nil),    // 8: coasterai.core.v1.AnimationSlidePlan
-	(*MetaData)(nil),              // 9: coasterai.core.v1.MetaData
-	(*AnimationSlideContent)(nil), // 10: coasterai.core.v1.AnimationSlideContent
-	(*CodeRegistry)(nil),          // 11: coasterai.core.v1.CodeRegistry
-	(*SpotlightEffect)(nil),       // 12: coasterai.core.v1.SpotlightEffect
-	(*CalloutEffect)(nil),         // 13: coasterai.core.v1.CalloutEffect
-	(*ZoomEffect)(nil),            // 14: coasterai.core.v1.ZoomEffect
-	(*Slide)(nil),                 // 15: coasterai.core.v1.Slide
-	(*BackgroundStyle)(nil),       // 16: coasterai.core.v1.BackgroundStyle
-	(*BackgroundEffect)(nil),      // 17: coasterai.core.v1.BackgroundEffect
-	(*SolidColor)(nil),            // 18: coasterai.core.v1.SolidColor
-	(*BackgroundImage)(nil),       // 19: coasterai.core.v1.BackgroundImage
-	(*Gradient)(nil),              // 20: coasterai.core.v1.Gradient
-	(*GradientStop)(nil),          // 21: coasterai.core.v1.GradientStop
-	(*Section)(nil),               // 22: coasterai.core.v1.Section
-	(*structpb.Struct)(nil),       // 23: google.protobuf.Struct
-	(*Voiceover)(nil),             // 24: coasterai.core.v1.Voiceover
+	(*MetaData)(nil),              // 8: coasterai.core.v1.MetaData
+	(*AnimationSlideContent)(nil), // 9: coasterai.core.v1.AnimationSlideContent
+	(*CodeRegistry)(nil),          // 10: coasterai.core.v1.CodeRegistry
+	(*SpotlightEffect)(nil),       // 11: coasterai.core.v1.SpotlightEffect
+	(*CalloutEffect)(nil),         // 12: coasterai.core.v1.CalloutEffect
+	(*ZoomEffect)(nil),            // 13: coasterai.core.v1.ZoomEffect
+	(*Slide)(nil),                 // 14: coasterai.core.v1.Slide
+	(*BackgroundStyle)(nil),       // 15: coasterai.core.v1.BackgroundStyle
+	(*BackgroundEffect)(nil),      // 16: coasterai.core.v1.BackgroundEffect
+	(*SolidColor)(nil),            // 17: coasterai.core.v1.SolidColor
+	(*BackgroundImage)(nil),       // 18: coasterai.core.v1.BackgroundImage
+	(*Gradient)(nil),              // 19: coasterai.core.v1.Gradient
+	(*GradientStop)(nil),          // 20: coasterai.core.v1.GradientStop
+	(*Section)(nil),               // 21: coasterai.core.v1.Section
+	(*structpb.Struct)(nil),       // 22: google.protobuf.Struct
+	(*Voiceover)(nil),             // 23: coasterai.core.v1.Voiceover
 }
 var file_coasterai_core_v1_slide_proto_depIdxs = []int32{
-	11, // 0: coasterai.core.v1.AnimationSlideContent.codeRegistry:type_name -> coasterai.core.v1.CodeRegistry
-	8,  // 1: coasterai.core.v1.AnimationSlideContent.plan:type_name -> coasterai.core.v1.AnimationSlidePlan
-	23, // 2: coasterai.core.v1.AnimationSlideContent.edits:type_name -> google.protobuf.Struct
-	11, // 3: coasterai.core.v1.AnimationSlideContent.history:type_name -> coasterai.core.v1.CodeRegistry
-	23, // 4: coasterai.core.v1.CodeRegistry.edits:type_name -> google.protobuf.Struct
-	23, // 5: coasterai.core.v1.CodeRegistry.defaults:type_name -> google.protobuf.Struct
-	2,  // 6: coasterai.core.v1.Slide.transition:type_name -> coasterai.core.v1.TransitionType
-	16, // 7: coasterai.core.v1.Slide.background_style:type_name -> coasterai.core.v1.BackgroundStyle
-	3,  // 8: coasterai.core.v1.Slide.direction:type_name -> coasterai.core.v1.TransitionDirection
-	10, // 9: coasterai.core.v1.Slide.content:type_name -> coasterai.core.v1.AnimationSlideContent
-	12, // 10: coasterai.core.v1.Slide.spotlights:type_name -> coasterai.core.v1.SpotlightEffect
-	13, // 11: coasterai.core.v1.Slide.callouts:type_name -> coasterai.core.v1.CalloutEffect
-	14, // 12: coasterai.core.v1.Slide.zooms:type_name -> coasterai.core.v1.ZoomEffect
-	23, // 13: coasterai.core.v1.Slide.plan:type_name -> google.protobuf.Struct
-	0,  // 14: coasterai.core.v1.Slide.slideStatus:type_name -> coasterai.core.v1.SlideStatus
-	24, // 15: coasterai.core.v1.Slide.voiceover:type_name -> coasterai.core.v1.Voiceover
-	18, // 16: coasterai.core.v1.BackgroundStyle.solid:type_name -> coasterai.core.v1.SolidColor
-	20, // 17: coasterai.core.v1.BackgroundStyle.gradient:type_name -> coasterai.core.v1.Gradient
-	19, // 18: coasterai.core.v1.BackgroundStyle.image:type_name -> coasterai.core.v1.BackgroundImage
-	6,  // 19: coasterai.core.v1.BackgroundStyle.pattern:type_name -> coasterai.core.v1.BackgroundPattern
-	17, // 20: coasterai.core.v1.BackgroundStyle.effect:type_name -> coasterai.core.v1.BackgroundEffect
-	7,  // 21: coasterai.core.v1.BackgroundEffect.type:type_name -> coasterai.core.v1.BackgroundEffectType
-	5,  // 22: coasterai.core.v1.Gradient.type:type_name -> coasterai.core.v1.GradientType
-	21, // 23: coasterai.core.v1.Gradient.stops:type_name -> coasterai.core.v1.GradientStop
-	15, // 24: coasterai.core.v1.Section.slides:type_name -> coasterai.core.v1.Slide
-	25, // [25:25] is the sub-list for method output_type
-	25, // [25:25] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	10, // 0: coasterai.core.v1.AnimationSlideContent.codeRegistry:type_name -> coasterai.core.v1.CodeRegistry
+	22, // 1: coasterai.core.v1.AnimationSlideContent.edits:type_name -> google.protobuf.Struct
+	22, // 2: coasterai.core.v1.CodeRegistry.edits:type_name -> google.protobuf.Struct
+	22, // 3: coasterai.core.v1.CodeRegistry.defaults:type_name -> google.protobuf.Struct
+	2,  // 4: coasterai.core.v1.Slide.transition:type_name -> coasterai.core.v1.TransitionType
+	15, // 5: coasterai.core.v1.Slide.background_style:type_name -> coasterai.core.v1.BackgroundStyle
+	3,  // 6: coasterai.core.v1.Slide.direction:type_name -> coasterai.core.v1.TransitionDirection
+	9,  // 7: coasterai.core.v1.Slide.content:type_name -> coasterai.core.v1.AnimationSlideContent
+	11, // 8: coasterai.core.v1.Slide.spotlights:type_name -> coasterai.core.v1.SpotlightEffect
+	12, // 9: coasterai.core.v1.Slide.callouts:type_name -> coasterai.core.v1.CalloutEffect
+	13, // 10: coasterai.core.v1.Slide.zooms:type_name -> coasterai.core.v1.ZoomEffect
+	0,  // 11: coasterai.core.v1.Slide.slideStatus:type_name -> coasterai.core.v1.SlideStatus
+	23, // 12: coasterai.core.v1.Slide.voiceover:type_name -> coasterai.core.v1.Voiceover
+	17, // 13: coasterai.core.v1.BackgroundStyle.solid:type_name -> coasterai.core.v1.SolidColor
+	19, // 14: coasterai.core.v1.BackgroundStyle.gradient:type_name -> coasterai.core.v1.Gradient
+	18, // 15: coasterai.core.v1.BackgroundStyle.image:type_name -> coasterai.core.v1.BackgroundImage
+	6,  // 16: coasterai.core.v1.BackgroundStyle.pattern:type_name -> coasterai.core.v1.BackgroundPattern
+	16, // 17: coasterai.core.v1.BackgroundStyle.effect:type_name -> coasterai.core.v1.BackgroundEffect
+	7,  // 18: coasterai.core.v1.BackgroundEffect.type:type_name -> coasterai.core.v1.BackgroundEffectType
+	5,  // 19: coasterai.core.v1.Gradient.type:type_name -> coasterai.core.v1.GradientType
+	20, // 20: coasterai.core.v1.Gradient.stops:type_name -> coasterai.core.v1.GradientStop
+	14, // 21: coasterai.core.v1.Section.slides:type_name -> coasterai.core.v1.Slide
+	22, // [22:22] is the sub-list for method output_type
+	22, // [22:22] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_slide_proto_init() }
@@ -2037,22 +1878,21 @@ func file_coasterai_core_v1_slide_proto_init() {
 	}
 	file_coasterai_core_v1_audio_proto_init()
 	file_coasterai_core_v1_slide_proto_msgTypes[0].OneofWrappers = []any{}
-	file_coasterai_core_v1_slide_proto_msgTypes[1].OneofWrappers = []any{}
-	file_coasterai_core_v1_slide_proto_msgTypes[3].OneofWrappers = []any{}
-	file_coasterai_core_v1_slide_proto_msgTypes[7].OneofWrappers = []any{}
-	file_coasterai_core_v1_slide_proto_msgTypes[8].OneofWrappers = []any{
+	file_coasterai_core_v1_slide_proto_msgTypes[2].OneofWrappers = []any{}
+	file_coasterai_core_v1_slide_proto_msgTypes[6].OneofWrappers = []any{}
+	file_coasterai_core_v1_slide_proto_msgTypes[7].OneofWrappers = []any{
 		(*BackgroundStyle_Solid)(nil),
 		(*BackgroundStyle_Gradient)(nil),
 		(*BackgroundStyle_Image)(nil),
 	}
-	file_coasterai_core_v1_slide_proto_msgTypes[14].OneofWrappers = []any{}
+	file_coasterai_core_v1_slide_proto_msgTypes[13].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_core_v1_slide_proto_rawDesc), len(file_coasterai_core_v1_slide_proto_rawDesc)),
 			NumEnums:      8,
-			NumMessages:   15,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

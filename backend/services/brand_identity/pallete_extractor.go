@@ -63,9 +63,10 @@ func BuildPalette(input map[string]string) Palette {
 	//------------------------------------------------------------------
 
 	// Secondary — fallback chain, but purely for its own use, not background
-	secondary := normalizeHex(input[COLOR_SECONDARY])
+	// use secondary as accent and if not available, fallback to secondary
+	secondary := normalizeHex(input[COLOR_ACCENT])
 	if secondary == "" {
-		if accentInput := normalizeHex(input[COLOR_ACCENT]); accentInput != "" {
+		if accentInput := normalizeHex(input[COLOR_SECONDARY]); accentInput != "" {
 			secondary = accentInput
 		} else {
 			secondary = rotateHueLighten(primary, +18, 0.20)
@@ -81,7 +82,8 @@ func BuildPalette(input map[string]string) Palette {
 	// Accent
 	//------------------------------------------------------------------
 	// Accent — kept for future, derived independently, never touches gradient
-	accent := normalizeHex(input[COLOR_ACCENT])
+	// since accent is used for secondary
+	accent := normalizeHex(input[COLOR_SECONDARY])
 	if accent == "" {
 		accent = rotateHueLighten(primary, -18, 0.12)
 	}

@@ -137,13 +137,14 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 					}
 				}
 
-				slide.Content.History = nil
-
 				nextSlide := getNextScene(plan.Sections, sectionIndex, slideIndex)
 				if isContentSlide(nextSlide) {
 					slide.Transition = pbcore.TransitionType_TRANSITION_SLIDE_LEFT
 					slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
 					slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_LEFT.Enum()
+				} else {
+					slide.Transition = pbcore.TransitionType_TRANSITION_FADE
+					slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
 				}
 
 				section.Slides = append(section.Slides, slide)

@@ -191,6 +191,7 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 		return fmt.Errorf("code registry can't be empty")
 	}
 
+	// Just a temp check, when we edit code using codeEditor, FE savees the config bydefault, we reject it
 	if content.CodeRegistry.MUrl != "" && content.CodeRegistry.Code != "" {
 		return fmt.Errorf("can't have both code registry and code")
 	}

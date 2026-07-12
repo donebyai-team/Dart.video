@@ -54,21 +54,6 @@ enum TransitionDirection {
 
 // ===================== CORE MESSAGES =====================
 
-// Mostly be used for debugging what AI created
-// Useful for rerunning the generation
-// selectedTemplateDescription is basically the prompt generated to created the animation
-// in case of existing template selectedTemplateDescription = template description
-message AnimationSlidePlan {
-  int64 index = 1;
-  string beatDescription = 2;
-  string animationType = 3;
-  string categorySearcQquery = 4;
-  int64 durationInFrames = 5;
-  optional string voiceover = 6;
-  optional string selectedTemplateDescription = 7;
-  optional string thinking_summary = 8;
-}
-
 message MetaData {
   float x = 2;
   float y = 3;
@@ -79,9 +64,7 @@ message MetaData {
 }
 message AnimationSlideContent {
   CodeRegistry codeRegistry = 1;
-  AnimationSlidePlan plan = 2;
   google.protobuf.Struct edits = 3;
-  repeated CodeRegistry history = 4;
 }
 
 message CodeRegistry {
@@ -141,7 +124,6 @@ enum EffectType {
 
 message Slide {
   string id = 1;
-  string transcript = 3;
   TransitionType transition = 5;
   optional int32 transitionDurationInFrames = 6;
   optional BackgroundStyle background_style = 7;
@@ -152,7 +134,6 @@ message Slide {
   repeated SpotlightEffect spotlights = 18;
   repeated CalloutEffect callouts = 19;
   repeated ZoomEffect zooms = 20;
-  google.protobuf.Struct plan = 21;
   SlideStatus slideStatus = 22;
   int32 index = 24;
   string tid = 27; // Template ID

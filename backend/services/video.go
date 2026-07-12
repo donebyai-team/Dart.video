@@ -264,11 +264,10 @@ func stripSlideForRender(slide *pbcore.Slide) {
 	}
 
 	// remove fields not needed for rendering
-	slide.Plan = nil
-	if slide.GetContent() != nil {
-		slide.GetContent().Plan = nil
-		//slide.GetContent().CodeRegistry.MUrl = ""
-	}
+	//if slide.GetContent() != nil {
+	//	slide.GetContent().Plan = nil
+	//	//slide.GetContent().CodeRegistry.MUrl = ""
+	//}
 }
 
 func (v videoGeneration) GetVideo(ctx context.Context, id, organizationID string, options VideoOptions) (*models.Video, int, error) {

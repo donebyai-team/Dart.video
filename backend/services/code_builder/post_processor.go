@@ -41,7 +41,7 @@ func resolveSFX(code string) string {
 	return code
 }
 
-var iconRegex = regexp.MustCompile(`"?icon:[^"]+"?`)
+var iconRegex = regexp.MustCompile(`"icon:[^"\r\n]+"|\bicon:[A-Za-z0-9._/-]+\b`)
 
 func ResolveIcons(code string) string {
 	return iconRegex.ReplaceAllStringFunc(code, func(match string) string {

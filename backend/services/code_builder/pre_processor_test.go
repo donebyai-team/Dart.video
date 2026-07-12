@@ -35,16 +35,38 @@ func TestResolveIcons(t *testing.T) {
 		{
 			name: "icon array",
 			input: `
-				const icons = [
-					"icon:google",
-					"icon:openai",
-				]
+				const DEFAULT_DATA = {
+  phone: {
+    time: "9:41",
+  },
+  payment: {
+    title: "Choose payment method",
+    continueLabel: "Continue",
+    poweredBy: "POWERED BY UPI",
+    options: [
+    {
+      label: "Pay on WhatsApp",
+      subtitle: "",
+      icon: "icon:whatsapp",
+      selected: true,
+    },
 			`,
 			expected: `
-				const icons = [
-					"https://www.thesvg.org/icons/google/color.svg",
-					"https://www.thesvg.org/icons/openai/light.svg",
-				]
+				const DEFAULT_DATA = {
+  phone: {
+    time: "9:41",
+  },
+  payment: {
+    title: "Choose payment method",
+    continueLabel: "Continue",
+    poweredBy: "POWERED BY UPI",
+    options: [
+    {
+      label: "Pay on WhatsApp",
+      subtitle: "",
+      icon: "https://www.thesvg.org/icons/whatsapp/default.svg",
+      selected: true,
+    },
 			`,
 		},
 		{

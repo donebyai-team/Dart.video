@@ -97,7 +97,6 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 		// Apply background
 		for _, slide := range slides {
 			slide.BackgroundStyle = contentSlide.BackgroundStyle
-			slide.Content.History = nil
 		}
 
 		sections = append(sections, &pbcore.Section{
