@@ -10,7 +10,7 @@ enum AIModel {
     AI_MODEL_UNSPECIFIED = 0;
     AI_MODEL_GEMINI_3_PRO = 1;
     AI_MODEL_GPT_5_5 = 2;
-    AI_MODEL_GPT_5_5_SOL = 3;
+    AI_MODEL_GPT_5_6_SOL = 3;
 }
 
 enum ConversationRole {

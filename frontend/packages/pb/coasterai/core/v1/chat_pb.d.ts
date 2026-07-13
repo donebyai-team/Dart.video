@@ -104,9 +104,9 @@ export enum AIModel {
   AI_MODEL_GPT_5_5 = 2,
 
   /**
-   * @generated from enum value: AI_MODEL_GPT_5_5_SOL = 3;
+   * @generated from enum value: AI_MODEL_GPT_5_6_SOL = 3;
    */
-  AI_MODEL_GPT_5_5_SOL = 3,
+  AI_MODEL_GPT_5_6_SOL = 3,
 }
 
 /**

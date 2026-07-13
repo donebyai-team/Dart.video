@@ -352,11 +352,14 @@ func (g gcpMediaStore) UploadFromURL(
 	return g.Upload(ctx, resp.Body, orgId, fileName)
 }
 
+// Generate a unique file path
 func GenerateCodeStoragePath(slideID, orgID string) string {
 	codeFilePath := fmt.Sprintf("templates/generated/%s", orgID)
 	if slideID != "" {
 		codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, slideID)
 	}
+
+	codeFilePath = fmt.Sprintf("%s-%d", codeFilePath, time.Now().Unix())
 
 	return codeFilePath
 }

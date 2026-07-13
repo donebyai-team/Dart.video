@@ -77,7 +77,7 @@ func (l *llmService) GenerateAnimation(
 	if options != nil && options.Model == pbcore.AIModel_AI_MODEL_GPT_5_5 {
 		cr.SetPrimaryClient("CustomOpenAI55WithThinkingSummary")
 		extractor = l.NewThinkingExtractor(NewOpenAIExtractor(), onThinking, thinkingMessages)
-	} else if options != nil && options.Model == pbcore.AIModel_AI_MODEL_GPT_5_5_SOL {
+	} else if options != nil && options.Model == pbcore.AIModel_AI_MODEL_GPT_5_6_SOL {
 		cr.SetPrimaryClient("SmartBoyGPTSOL")
 		extractor = l.NewThinkingExtractor(NewOpenAIExtractor(), onThinking, thinkingMessages)
 	} else {
@@ -284,7 +284,7 @@ func (l *llmService) GenerateScript(
 	return nil, nil, fmt.Errorf("stream closed without final result")
 }
 
-var defaultModel = pbcore.AIModel_AI_MODEL_GPT_5_5_SOL
+var defaultModel = pbcore.AIModel_AI_MODEL_GPT_5_6_SOL
 
 func SelectModelToUseForCodeGeneration(userModel *pbcore.AIModel) *pbcore.AIModel {
 	if userModel == nil || *userModel == pbcore.AIModel_AI_MODEL_UNSPECIFIED {

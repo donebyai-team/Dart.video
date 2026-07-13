@@ -45,8 +45,9 @@ func InjectDefaultDataGeneratedCode(
 
 	placeholder := fmt.Sprintf("__%s__", defaultDataKey)
 
+	// TODO: Remove this, as when we save code from editor then we have to send the updated DEFAULT DATA
 	if !strings.Contains(code, placeholder) {
-		return "", fmt.Errorf("placeholder %s not found", placeholder)
+		//return "", fmt.Errorf("placeholder %s not found", placeholder)
 	}
 
 	jsonBytes, err := protojson.MarshalOptions{

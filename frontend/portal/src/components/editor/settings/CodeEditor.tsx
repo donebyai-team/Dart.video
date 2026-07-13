@@ -162,13 +162,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
         <div className='min-w-0'>
           <h3 className='font-semibold text-sm tracking-tight'>
             Code Editor
-          </h3>
-
-          <p className='text-xs text-muted-foreground truncate'>
-            {hasInlineCode
-              ? 'Inline generated animation code'
-              : templateUrl || 'No generated animation code available'}
-          </p>
+          </h3>      
         </div>
 
         <div className='flex items-center gap-2'>
