@@ -51,7 +51,7 @@ func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset)
 	}
 
 	// Call the BAML function
-	result, err := baml_client.AnalyzeImage(ctx, img, baml_client.WithTags(getTags(ctx)))
+	result, err := baml_client.AnalyzeImage(ctx, img, baml_client.WithTags(getTagsForBamlStudio(ctx)))
 	if err != nil {
 		return nil, agenterrors.AssetAnalysisFailed("failed to analyze asset image", err)
 	}

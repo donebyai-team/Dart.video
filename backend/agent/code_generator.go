@@ -84,17 +84,10 @@ func NewCodeGeneratorAgent(
 	}
 }
 
-func (l *codeGenerator) setTags(ctx context.Context) context.Context {
-	ctx = context.WithValue(ctx, llm.VideoIDKey, l.videoID)
-	ctx = context.WithValue(ctx, llm.SceneIDKey, l.slideID)
-	return ctx
-}
-
 func (l *codeGenerator) ContinueAgent(
 	ctx context.Context,
 	options ContinueSessionOptions,
 ) (*common.RunResult, error) {
-	ctx = l.setTags(ctx)
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
 		return nil, agenterrors.InvalidInput("user response is required", nil)
@@ -220,7 +213,6 @@ func (l *codeGenerator) GenerateCode(
 	slide *pbcore.Slide,
 	input *pbportal.CreateVideoRequest,
 ) (*common.RunResult, error) {
-	ctx = l.setTags(ctx)
 	if err := ValidatePrompt(input.Prompt); err != nil {
 		return nil, err
 	}

@@ -100,14 +100,9 @@ func NewAgentV2(
 	}
 }
 
-func (a *agentV2) setTags(ctx context.Context) context.Context {
-	return context.WithValue(ctx, llm.VideoIDKey, a.session.GetID())
-}
-
 const SCRIPT_CONFORMATION_RESPONSE = "SCRIPT_APPROVED"
 
 func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) (*common.RunResult, error) {
-	ctx = a.setTags(ctx)
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
 		return nil, agenterrors.InvalidInput("user response is required", nil)
@@ -182,7 +177,6 @@ func (a *agentV2) StopAgent(ctx context.Context) error {
 }
 
 func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*common.RunResult, error) {
-	ctx = a.setTags(ctx)
 	if err := a.validateStartOptions(options); err != nil {
 		return nil, err
 	}
@@ -382,7 +376,7 @@ func (a *agentV2) generateScenes(
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		a.publishProcessingState("Generating scenes...")
-		llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, nil, func(chunk string) {
+		llmResponse, err := a.llmService.GenerateVideoScenes(ctx, req, nil, func(chunk string) {
 			a.publishProcessingState(chunk)
 		})
 		if err != nil {

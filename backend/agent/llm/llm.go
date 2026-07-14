@@ -18,7 +18,7 @@ import (
 // Not implemented — wire in your preferred provider (Anthropic, OpenAI, etc.)
 type Service interface {
 	AnalyzeImage(ctx context.Context, asset *models.MediaAsset) (*types.AssetAnalysis, error)
-	GeneratePlanV2(
+	GenerateVideoScenes(
 		ctx context.Context,
 		req types.VideoGenerationPlanRequest,
 		conversationHistory []types.Message,
@@ -49,7 +49,7 @@ type llmService struct {
 }
 
 func (l *llmService) CategorizeScene(ctx context.Context, req types.MatchCategoriesRequest) (*types.MatchCategoriesResponse, error) {
-	categories, err := baml_client.MatchCategories(ctx, req, baml_client.WithTags(getTags(ctx)))
+	categories, err := baml_client.MatchCategories(ctx, req, baml_client.WithTags(getTagsForBamlStudio(ctx)))
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (l *llmService) CategorizeScene(ctx context.Context, req types.MatchCategor
 }
 
 func (l *llmService) ExtractTemplateConfig(ctx context.Context, req types.ExtractTemplateConfigRequest) (*types.ExtractTemplateConfigResponse, error) {
-	categories, err := baml_client.ExtractTemplateConfig(ctx, req, baml_client.WithTags(getTags(ctx)))
+	categories, err := baml_client.ExtractTemplateConfig(ctx, req, baml_client.WithTags(getTagsForBamlStudio(ctx)))
 	if err != nil {
 		return nil, err
 	}
@@ -84,9 +84,15 @@ func (l *llmService) GenerateAnimation(
 		extractor = l.NewThinkingExtractor(NewGeminiExtractor(), onThinking, thinkingMessages)
 	}
 
+	collector, err := baml_client.NewCollector("usage")
+	if err != nil {
+		return nil, nil, err
+	}
+
 	callOptions := []baml_client.CallOptionFunc{
 		baml_client.WithOnTick(extractor.HandleTick),
-		baml_client.WithTags(getTags(ctx)),
+		baml_client.WithCollector(collector),
+		baml_client.WithTags(getTagsForBamlStudio(ctx)),
 	}
 
 	callOptions = append(callOptions, baml_client.WithClientRegistry(cr))
@@ -102,6 +108,14 @@ func (l *llmService) GenerateAnimation(
 			// Note: In practice, range automatically handles closing
 			// but explicit cleanup is shown here for demonstration
 			l.logger.Info("Stream completed")
+
+			// Get usage information
+			usage, err := collector.Usage()
+			if err != nil {
+				// just log the error, don't fail the entire pipeline
+				l.logger.Error("Failed to get usage information", zap.Error(err))
+				l.logger.Error("Usage information", zap.Any("usage", usage))
+			}
 		}
 	}()
 
@@ -140,7 +154,7 @@ func NewLlmService(logger *zap.Logger, cache cache.Cache) Service {
 	return &llmService{logger: logger, cache: cache}
 }
 
-func (l *llmService) GeneratePlanV2(
+func (l *llmService) GenerateVideoScenes(
 	ctx context.Context,
 	req types.VideoGenerationPlanRequest,
 	conversationHistory []types.Message,
@@ -162,7 +176,7 @@ func (l *llmService) GeneratePlanV2(
 
 	stream, err := baml_client.Stream.GeneratePlan(ctx, req, conversationHistory,
 		baml_client.WithOnTick(extractor.HandleTick),
-		baml_client.WithTags(getTags(ctx)))
+		baml_client.WithTags(getTagsForBamlStudio(ctx)))
 	if err != nil {
 		return nil, handleInitialError(err)
 	}
@@ -239,7 +253,7 @@ func (l *llmService) GenerateScript(
 	stream, err := baml_client.Stream.GenerateScript(ctx, req, conversationHistory,
 		baml_client.WithOnTick(extractor.HandleTick),
 		baml_client.WithTypeBuilder(tb),
-		baml_client.WithTags(getTags(ctx)))
+		baml_client.WithTags(getTagsForBamlStudio(ctx)))
 	if err != nil {
 		return nil, nil, handleInitialError(err)
 	}

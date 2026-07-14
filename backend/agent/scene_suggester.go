@@ -47,8 +47,6 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 	templateIDs []string,
 	contentSlide *pbcore.Slide,
 	video *models.Video) ([]*pbcore.Section, error) {
-	ctx = context.WithValue(ctx, llm.VideoIDKey, video.ID)
-	ctx = context.WithValue(ctx, llm.SceneIDKey, contentSlide.GetId())
 
 	sections := make([]*pbcore.Section, 0)
 	currentSlideContent := templates.ExtractSceneContent(contentSlide, s.logger)
@@ -108,9 +106,6 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 }
 
 func (s SceneSuggester) GenerateSuggestions(ctx context.Context, req *pbportal.GenerateSuggestionsInput) (*pbportal.GenerateSuggestionsResponse, error) {
-	ctx = context.WithValue(ctx, llm.VideoIDKey, req.VideoId)
-	ctx = context.WithValue(ctx, llm.SceneIDKey, req.Slide.GetId())
-
 	var categories []string
 	if len(req.Categories) > 0 {
 		categories = req.Categories

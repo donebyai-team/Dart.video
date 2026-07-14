@@ -60,6 +60,7 @@ const (
 	PortalService_GenerateSuggestions_FullMethodName    = "/coasterai.portal.v1.PortalService/GenerateSuggestions"
 	PortalService_RenderSuggestion_FullMethodName       = "/coasterai.portal.v1.PortalService/RenderSuggestion"
 	PortalService_GenerateVoiceover_FullMethodName      = "/coasterai.portal.v1.PortalService/GenerateVoiceover"
+	PortalService_GetCredits_FullMethodName             = "/coasterai.portal.v1.PortalService/GetCredits"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -113,6 +114,8 @@ type PortalServiceClient interface {
 	RenderSuggestion(ctx context.Context, in *RenderSuggestionsInput, opts ...grpc.CallOption) (*SuggestScenesResponse, error)
 	// Voiceover
 	GenerateVoiceover(ctx context.Context, in *GenerateVoiceoverRequest, opts ...grpc.CallOption) (*v1.Voiceover, error)
+	// Credits
+	GetCredits(ctx context.Context, in *v1.GetCreditsRequest, opts ...grpc.CallOption) (*v1.GetCreditsResponse, error)
 }
 
 type portalServiceClient struct {
@@ -566,6 +569,15 @@ func (c *portalServiceClient) GenerateVoiceover(ctx context.Context, in *Generat
 	return out, nil
 }
 
+func (c *portalServiceClient) GetCredits(ctx context.Context, in *v1.GetCreditsRequest, opts ...grpc.CallOption) (*v1.GetCreditsResponse, error) {
+	out := new(v1.GetCreditsResponse)
+	err := c.cc.Invoke(ctx, PortalService_GetCredits_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -617,6 +629,8 @@ type PortalServiceServer interface {
 	RenderSuggestion(context.Context, *RenderSuggestionsInput) (*SuggestScenesResponse, error)
 	// Voiceover
 	GenerateVoiceover(context.Context, *GenerateVoiceoverRequest) (*v1.Voiceover, error)
+	// Credits
+	GetCredits(context.Context, *v1.GetCreditsRequest) (*v1.GetCreditsResponse, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -740,6 +754,9 @@ func (UnimplementedPortalServiceServer) RenderSuggestion(context.Context, *Rende
 }
 func (UnimplementedPortalServiceServer) GenerateVoiceover(context.Context, *GenerateVoiceoverRequest) (*v1.Voiceover, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateVoiceover not implemented")
+}
+func (UnimplementedPortalServiceServer) GetCredits(context.Context, *v1.GetCreditsRequest) (*v1.GetCreditsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCredits not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -1468,6 +1485,24 @@ func _PortalService_GenerateVoiceover_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_GetCredits_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.GetCreditsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetCredits(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetCredits_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetCredits(ctx, req.(*v1.GetCreditsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1614,6 +1649,10 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateVoiceover",
 			Handler:    _PortalService_GenerateVoiceover_Handler,
+		},
+		{
+			MethodName: "GetCredits",
+			Handler:    _PortalService_GetCredits_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

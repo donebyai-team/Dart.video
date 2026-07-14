@@ -3,6 +3,7 @@ package portal
 import (
 	"context"
 	"fmt"
+	"github.com/shank318/coasterai/agent/llm"
 
 	"connectrpc.com/connect"
 	"github.com/shank318/coasterai/auth"
@@ -24,4 +25,15 @@ func (p *Portal) setupLogger(ctx context.Context, user *auth.AuthContext) {
 	logger := logging.Logger(ctx, p.logger)
 	logger = logger.With(zap.String("actor", user.ID), zap.String("actor_org_id", user.OrganizationID))
 	logging.WithLogger(ctx, logger)
+}
+
+func (p *Portal) setContext(ctx context.Context, orgID, videoID, sceneID string) context.Context {
+	ctx = context.WithValue(ctx, llm.OrgIDKey, orgID)
+	if videoID != "" {
+		ctx = context.WithValue(ctx, llm.VideoIDKey, videoID)
+	}
+	if sceneID != "" {
+		ctx = context.WithValue(ctx, llm.SceneIDKey, sceneID)
+	}
+	return ctx
 }
