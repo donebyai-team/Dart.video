@@ -1,24 +1,19 @@
 package llm
 
-import "context"
-
-type contextKey string
-
-const (
-	VideoIDKey contextKey = "video_id"
-	OrgIDKey   contextKey = "org_id"
-	SceneIDKey contextKey = "scene_id"
+import (
+	"context"
+	"github.com/shank318/coasterai/agent/common"
 )
 
 func getTagsForBamlStudio(ctx context.Context) map[string]string {
 	tags := make(map[string]string)
 
-	if traceID, ok := ctx.Value(VideoIDKey).(string); ok {
-		tags[string(VideoIDKey)] = traceID
+	if traceID, ok := ctx.Value(common.VideoIDKey).(string); ok {
+		tags[string(common.VideoIDKey)] = traceID
 	}
 
-	if traceID, ok := ctx.Value(SceneIDKey).(string); ok {
-		tags[string(SceneIDKey)] = traceID
+	if traceID, ok := ctx.Value(common.SceneIDKey).(string); ok {
+		tags[string(common.SceneIDKey)] = traceID
 	}
 
 	return tags

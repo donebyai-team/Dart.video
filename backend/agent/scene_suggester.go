@@ -27,9 +27,13 @@ type SceneSuggester struct {
 	logger               *zap.Logger
 }
 
-func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, db datastore.Repository, templateService templates.Service, logger *zap.Logger) *SceneSuggester {
+func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity,
+	db datastore.Repository,
+	templateService templates.Service,
+	llm llm.Service,
+	logger *zap.Logger) *SceneSuggester {
 	return &SceneSuggester{
-		llmService:           llm.NewLlmService(logger, nil),
+		llmService:           llm,
 		codeGenerator:        &codeGenerator{logger: logger},
 		brandIdentityService: brandIdentityService,
 		db:                   db,

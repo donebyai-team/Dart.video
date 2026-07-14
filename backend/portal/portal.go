@@ -10,6 +10,7 @@ import (
 	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/code_builder"
+	"github.com/shank318/coasterai/services/credits"
 	figmasvc "github.com/shank318/coasterai/services/figma"
 	"github.com/shank318/coasterai/services/templates"
 	"regexp"
@@ -47,6 +48,7 @@ type Portal struct {
 	renderVideoService      services.RenderVideoService
 	brandIdentityService    brand_identity.BrandIdentity
 	audioGenerationProvider audio.Service
+	creditsService          credits.Service
 	templateService         templates.Service
 }
 
@@ -64,6 +66,7 @@ func New(
 	codeBuilderService code_builder.CodeBuilder,
 	audioGenerationProvider audio.Service,
 	llmService llm.Service,
+	creditsService credits.Service,
 	templateService templates.Service,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
@@ -96,13 +99,14 @@ func New(
 		renderVideoService:      renderVideoService,
 		audioGenerationProvider: audioGenerationProvider,
 		llmService:              llmService,
+		creditsService:          creditsService,
 		templateService:         templateService,
 	}
 }
 
 func (p *Portal) Run(ctx context.Context) error {
 	p.logger.Info("starting portal server", zap.String("http_listen_addr", p.httpListenAddr))
-	s := server.New(p.httpListenAddr, p.authenticator, p.corsURLRegexAllow, p.isAppReady, p.logger)
+	s := server.New(p.httpListenAddr, p.authenticator, p.creditsService, p.corsURLRegexAllow, p.isAppReady, p.logger)
 	p.OnTerminating(func(_ error) {
 		s.Shutdown(nil)
 	})

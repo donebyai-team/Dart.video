@@ -11,29 +11,32 @@ import (
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
+	"github.com/shank318/coasterai/services/credits"
 	"github.com/shank318/coasterai/utils"
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
 )
 
 type AuthUsecase struct {
-	auth0  *auth0
-	db     datastore.Repository
-	signer crypto.SigningKeyGetter
-	logger *zap.Logger
+	auth0         *auth0
+	db            datastore.Repository
+	signer        crypto.SigningKeyGetter
+	creditService credits.Service
+	logger        *zap.Logger
 }
 
-func NewAuthUsecase(ctx context.Context, auth0Config *Auth0Config, db datastore.Repository, signingAPIKeyGetter crypto.SigningKeyGetter, logger *zap.Logger) (*AuthUsecase, error) {
+func NewAuthUsecase(ctx context.Context, auth0Config *Auth0Config, db datastore.Repository, signingAPIKeyGetter crypto.SigningKeyGetter, creditService credits.Service, logger *zap.Logger) (*AuthUsecase, error) {
 	auth0, err := newAuth0(ctx, auth0Config, logger)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create auth0: %w", err)
 	}
 
 	return &AuthUsecase{
-		auth0:  auth0,
-		db:     db,
-		signer: signingAPIKeyGetter,
-		logger: logger,
+		auth0:         auth0,
+		db:            db,
+		signer:        signingAPIKeyGetter,
+		logger:        logger,
+		creditService: creditService,
 	}, nil
 }
 func (a *AuthUsecase) StartPasswordless(ctx context.Context, email string, ip string) error {
@@ -137,6 +140,12 @@ func (a *AuthUsecase) createUserForEmail(ctx context.Context, email string, emai
 		if err != nil {
 			logger.Error("failed to create organization", zap.Error(err), zap.String("org_name", orgName))
 			return nil, fmt.Errorf("unable to create organization: %w", err)
+		}
+
+		// GRANT INITIAL CREDITS
+		err = a.creditService.GrantInitialCredits(ctx, org.ID)
+		if err != nil {
+			logger.Error("failed to grant initial credits", zap.Error(err), zap.String("org_name", orgName))
 		}
 	}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/services/credits"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"time"
@@ -49,12 +50,21 @@ func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset)
 	if err != nil {
 		return nil, agenterrors.AssetAnalysisFailed("failed to parse asset image", err)
 	}
+	collector, err := baml_client.NewCollector("usage")
+	if err != nil {
+		return nil, err
+	}
 
 	// Call the BAML function
-	result, err := baml_client.AnalyzeImage(ctx, img, baml_client.WithTags(getTagsForBamlStudio(ctx)))
+	result, err := baml_client.AnalyzeImage(ctx, img,
+		baml_client.WithCollector(collector),
+		baml_client.WithTags(getTagsForBamlStudio(ctx)),
+	)
 	if err != nil {
 		return nil, agenterrors.AssetAnalysisFailed("failed to analyze asset image", err)
 	}
+
+	l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "gemini", model: "gemini-3.1-pro-preview"}, credits.ActionAnalyzeImage)
 
 	analyisObj, err := json.Marshal(result)
 	if err != nil {

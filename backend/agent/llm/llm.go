@@ -10,6 +10,7 @@ import (
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/services/credits"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 )
@@ -44,23 +45,44 @@ type LLMOptions struct {
 }
 
 type llmService struct {
-	logger *zap.Logger
-	cache  cache.Cache
+	logger         *zap.Logger
+	cache          cache.Cache
+	creditsService credits.Service
 }
 
 func (l *llmService) CategorizeScene(ctx context.Context, req types.MatchCategoriesRequest) (*types.MatchCategoriesResponse, error) {
-	categories, err := baml_client.MatchCategories(ctx, req, baml_client.WithTags(getTagsForBamlStudio(ctx)))
+	collector, err := baml_client.NewCollector("usage")
 	if err != nil {
 		return nil, err
 	}
+
+	categories, err := baml_client.MatchCategories(ctx, req,
+		baml_client.WithCollector(collector),
+		baml_client.WithTags(getTagsForBamlStudio(ctx)),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "gemini", model: "gemini-3.1-pro-preview"}, credits.ActionCategorizeScene)
 	return &categories, nil
 }
 
 func (l *llmService) ExtractTemplateConfig(ctx context.Context, req types.ExtractTemplateConfigRequest) (*types.ExtractTemplateConfigResponse, error) {
-	categories, err := baml_client.ExtractTemplateConfig(ctx, req, baml_client.WithTags(getTagsForBamlStudio(ctx)))
+	collector, err := baml_client.NewCollector("usage")
 	if err != nil {
 		return nil, err
 	}
+
+	categories, err := baml_client.ExtractTemplateConfig(ctx, req,
+		baml_client.WithCollector(collector),
+		baml_client.WithTags(getTagsForBamlStudio(ctx)),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "gemini", model: "gemini-3.1-pro-preview"}, credits.ActionExtractTemplateConfig)
 	return &categories, nil
 }
 
@@ -108,14 +130,7 @@ func (l *llmService) GenerateAnimation(
 			// Note: In practice, range automatically handles closing
 			// but explicit cleanup is shown here for demonstration
 			l.logger.Info("Stream completed")
-
-			// Get usage information
-			usage, err := collector.Usage()
-			if err != nil {
-				// just log the error, don't fail the entire pipeline
-				l.logger.Error("Failed to get usage information", zap.Error(err))
-				l.logger.Error("Usage information", zap.Any("usage", usage))
-			}
+			l.chargeUsage(ctx, l.logger, collector, animationProviderModel(options), credits.ActionAnimationGeneration)
 		}
 	}()
 
@@ -150,8 +165,8 @@ func (l *llmService) GenerateAnimation(
 	return nil, nil, fmt.Errorf("stream closed without final result")
 }
 
-func NewLlmService(logger *zap.Logger, cache cache.Cache) Service {
-	return &llmService{logger: logger, cache: cache}
+func NewLlmService(logger *zap.Logger, cache cache.Cache, service credits.Service) Service {
+	return &llmService{logger: logger, cache: cache, creditsService: service}
 }
 
 func (l *llmService) GenerateVideoScenes(
@@ -173,9 +188,14 @@ func (l *llmService) GenerateVideoScenes(
 	//return &a, nil
 
 	extractor := l.NewThinkingExtractor(NewOpenAIExtractor(), onThinking, thinkingMessages)
+	collector, err := baml_client.NewCollector("usage")
+	if err != nil {
+		return nil, err
+	}
 
 	stream, err := baml_client.Stream.GeneratePlan(ctx, req, conversationHistory,
 		baml_client.WithOnTick(extractor.HandleTick),
+		baml_client.WithCollector(collector),
 		baml_client.WithTags(getTagsForBamlStudio(ctx)))
 	if err != nil {
 		return nil, handleInitialError(err)
@@ -187,6 +207,7 @@ func (l *llmService) GenerateVideoScenes(
 			// Note: In practice, range automatically handles closing
 			// but explicit cleanup is shown here for demonstration
 			l.logger.Info("Stream completed")
+			l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "gemini", model: "gemini-3-pro"}, credits.ActionScenesGeneration)
 		}
 	}()
 
@@ -232,6 +253,10 @@ func (l *llmService) GenerateScript(
 	l.logger.Info("🚀 Starting planning script generation..")
 
 	extractor := l.NewThinkingExtractor(NewOpenAIExtractor(), onThinking, thinkingMessages)
+	collector, err := baml_client.NewCollector("usage")
+	if err != nil {
+		return nil, nil, err
+	}
 
 	tb, err := baml_client.NewTypeBuilder()
 	if err != nil {
@@ -252,6 +277,7 @@ func (l *llmService) GenerateScript(
 
 	stream, err := baml_client.Stream.GenerateScript(ctx, req, conversationHistory,
 		baml_client.WithOnTick(extractor.HandleTick),
+		baml_client.WithCollector(collector),
 		baml_client.WithTypeBuilder(tb),
 		baml_client.WithTags(getTagsForBamlStudio(ctx)))
 	if err != nil {
@@ -264,6 +290,7 @@ func (l *llmService) GenerateScript(
 			// Note: In practice, range automatically handles closing
 			// but explicit cleanup is shown here for demonstration
 			l.logger.Info("Stream completed")
+			l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "openai", model: "gpt-5.6"}, credits.ActionScriptGeneration)
 		}
 	}()
 

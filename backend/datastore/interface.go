@@ -28,6 +28,7 @@ type Repository interface {
 	TemplateRepository
 	BrandIdentityRepository
 	MediaAssetRepository
+	CreditsRepository
 }
 
 type OrganizationRepository interface {
@@ -124,4 +125,10 @@ type MediaAssetRepository interface {
 	GetMediaAssetsByID(ctx context.Context, IDs []string) ([]*models.MediaAsset, error)
 	GetMediaAssetsByOrgID(ctx context.Context, orgID string, mediaType pbcore.MediaType) ([]*models.MediaAsset, error)
 	CreateMediaAsset(ctx context.Context, asset *models.MediaAsset) (*models.MediaAsset, error)
+}
+
+type CreditsRepository interface {
+	CreateCreditLedgerEntry(context.Context, *models.CreditLedgerEntry) (*models.CreditLedgerEntry, error)
+	GetAvailableCredits(context.Context, string, *string) (int, error)
+	ListCreditLedgerEntries(context.Context, string, *string, *string) ([]*models.CreditLedgerEntry, error)
 }
