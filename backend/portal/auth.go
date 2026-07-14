@@ -1,11 +1,9 @@
 package portal
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"fmt"
-	"github.com/shank318/coasterai/agent/llm"
-
-	"connectrpc.com/connect"
 	"github.com/shank318/coasterai/auth"
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
@@ -28,12 +26,12 @@ func (p *Portal) setupLogger(ctx context.Context, user *auth.AuthContext) {
 }
 
 func (p *Portal) setContext(ctx context.Context, orgID, videoID, sceneID string) context.Context {
-	ctx = context.WithValue(ctx, llm.OrgIDKey, orgID)
+	ctx = context.WithValue(ctx, auth.OrgIDKey, orgID)
 	if videoID != "" {
-		ctx = context.WithValue(ctx, llm.VideoIDKey, videoID)
+		ctx = context.WithValue(ctx, auth.VideoIDKey, videoID)
 	}
 	if sceneID != "" {
-		ctx = context.WithValue(ctx, llm.SceneIDKey, sceneID)
+		ctx = context.WithValue(ctx, auth.SceneIDKey, sceneID)
 	}
 	return ctx
 }

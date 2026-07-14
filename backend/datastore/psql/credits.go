@@ -47,7 +47,7 @@ func (r *Database) GetAvailableCredits(ctx context.Context, orgID string, refere
 	available := 0
 	err := stmt.GetContext(ctx, &available, map[string]any{
 		"org_id":       orgID,
-		"reference_id": optionalString(referenceID),
+		"reference_id": referenceID,
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to get available credits: %w", err)
@@ -56,17 +56,8 @@ func (r *Database) GetAvailableCredits(ctx context.Context, orgID string, refere
 	return available, nil
 }
 
-func (r *Database) ListCreditLedgerEntries(ctx context.Context, orgID string, referenceID *string, entryType *string) ([]*models.CreditLedgerEntry, error) {
+func (r *Database) ListCreditLedgerEntries(ctx context.Context, orgID string) ([]*models.CreditLedgerEntry, error) {
 	return getMany[models.CreditLedgerEntry](ctx, r, "credits/query_credit_ledger_entries.sql", map[string]any{
-		"org_id":       orgID,
-		"reference_id": optionalString(referenceID),
-		"entry_type":   optionalString(entryType),
+		"org_id": orgID,
 	})
-}
-
-func optionalString(value *string) string {
-	if value == nil {
-		return ""
-	}
-	return *value
 }

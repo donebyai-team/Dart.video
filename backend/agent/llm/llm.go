@@ -64,7 +64,7 @@ func (l *llmService) CategorizeScene(ctx context.Context, req types.MatchCategor
 		return nil, err
 	}
 
-	l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "gemini", model: "gemini-3.1-pro-preview"}, credits.ActionCategorizeScene)
+	l.chargeUsage(ctx, collector, credits.ActionCategorizeScene)
 	return &categories, nil
 }
 
@@ -82,7 +82,7 @@ func (l *llmService) ExtractTemplateConfig(ctx context.Context, req types.Extrac
 		return nil, err
 	}
 
-	l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "gemini", model: "gemini-3.1-pro-preview"}, credits.ActionExtractTemplateConfig)
+	l.chargeUsage(ctx, collector, credits.ActionExtractTemplateConfig)
 	return &categories, nil
 }
 
@@ -130,7 +130,7 @@ func (l *llmService) GenerateAnimation(
 			// Note: In practice, range automatically handles closing
 			// but explicit cleanup is shown here for demonstration
 			l.logger.Info("Stream completed")
-			l.chargeUsage(ctx, l.logger, collector, animationProviderModel(options), credits.ActionAnimationGeneration)
+			l.chargeUsage(ctx, collector, credits.ActionAnimationGeneration)
 		}
 	}()
 
@@ -207,7 +207,7 @@ func (l *llmService) GenerateVideoScenes(
 			// Note: In practice, range automatically handles closing
 			// but explicit cleanup is shown here for demonstration
 			l.logger.Info("Stream completed")
-			l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "gemini", model: "gemini-3-pro"}, credits.ActionScenesGeneration)
+			l.chargeUsage(ctx, collector, credits.ActionScenesGeneration)
 		}
 	}()
 
@@ -290,7 +290,7 @@ func (l *llmService) GenerateScript(
 			// Note: In practice, range automatically handles closing
 			// but explicit cleanup is shown here for demonstration
 			l.logger.Info("Stream completed")
-			l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "openai", model: "gpt-5.6"}, credits.ActionScriptGeneration)
+			l.chargeUsage(ctx, collector, credits.ActionScriptGeneration)
 		}
 	}()
 

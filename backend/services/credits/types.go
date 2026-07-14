@@ -3,7 +3,6 @@ package credits
 import (
 	"context"
 	"errors"
-	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 	"github.com/shank318/coasterai/models"
 )
 
@@ -19,6 +18,7 @@ const (
 	ActionVoiceGeneration       Action = "VOICE_GENERATION"
 	ActionAnalyzeImage          Action = "ANALYZE_IMAGE"
 	ActionExtractTemplateConfig Action = "EXTRACT_TEMPLATE_CONFIG"
+	ActionTopUp                 Action = "TOP_UP"
 )
 
 const (
@@ -32,13 +32,41 @@ type Service interface {
 	ChargeCredits(ctx context.Context, input ChargeCreditsInput) error
 	GetAvailableCredits(ctx context.Context, orgID string, referenceID *string) (int, error)
 	GetEstimatedCredits(actions []Action) int
-	GetRechargeHistory(ctx context.Context, orgID string, referenceID *string) ([]*models.CreditLedgerEntry, error)
+	GetRechargeHistory(ctx context.Context, orgID string) ([]*models.CreditLedgerEntry, error)
 	GrantInitialCredits(ctx context.Context, orgID string) error
+}
+
+type Usage interface {
+	InputTokens() (int64, error)
+	OutputTokens() (int64, error)
+	CachedInputTokens() (int64, error)
+}
+
+type usage struct {
+	inputTokens       int64
+	outputTokens      int64
+	cachedInputTokens int64
+}
+
+func NewUsage(inputTokens, outputTokens, cachedInputTokens int64) Usage {
+	return usage{inputTokens: inputTokens, outputTokens: outputTokens, cachedInputTokens: cachedInputTokens}
+}
+
+func (u usage) InputTokens() (int64, error) {
+	return u.inputTokens, nil
+}
+
+func (u usage) OutputTokens() (int64, error) {
+	return u.outputTokens, nil
+}
+
+func (u usage) CachedInputTokens() (int64, error) {
+	return u.cachedInputTokens, nil
 }
 
 type ChargeCreditsInput struct {
 	Provider string
 	Model    string
-	Usage    baml.Usage
+	Usage    Usage
 	Action   Action
 }

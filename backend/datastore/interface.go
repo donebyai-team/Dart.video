@@ -130,5 +130,5 @@ type MediaAssetRepository interface {
 type CreditsRepository interface {
 	CreateCreditLedgerEntry(context.Context, *models.CreditLedgerEntry) (*models.CreditLedgerEntry, error)
 	GetAvailableCredits(context.Context, string, *string) (int, error)
-	ListCreditLedgerEntries(context.Context, string, *string, *string) ([]*models.CreditLedgerEntry, error)
+	ListCreditLedgerEntries(context.Context, string) ([]*models.CreditLedgerEntry, error)
 }

@@ -3,8 +3,7 @@ package credits
 import (
 	"context"
 	"fmt"
-	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
-	"github.com/shank318/coasterai/agent/common"
+	"github.com/shank318/coasterai/auth"
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	"go.uber.org/zap"
@@ -31,10 +30,11 @@ func (s *service) ChargeCredits(ctx context.Context, input ChargeCreditsInput) e
 		return fmt.Errorf("pricing not found for provider=%s model=%s", input.Provider, input.Model)
 	}
 
-	originalAmount, err := creditsFromUsage(input.Usage, pricing)
+	usage, err := creditLedgerUsage(input.Usage)
 	if err != nil {
-		return fmt.Errorf("credits from usage: %w", err)
+		return fmt.Errorf("credit ledger usage: %w", err)
 	}
+	originalAmount := creditsFromUsage(usage, pricing)
 	cfg := getActionConfig(input.Action)
 	chargedAmount := originalAmount * cfg.Multiplier
 	if !cfg.ChargeEnabled {
@@ -44,7 +44,7 @@ func (s *service) ChargeCredits(ctx context.Context, input ChargeCreditsInput) e
 	metadata := models.CreditLedgerMetadata{
 		Provider:   input.Provider,
 		Model:      input.Model,
-		Usage:      input.Usage,
+		Usage:      usage,
 		Multiplier: cfg.Multiplier,
 	}
 
@@ -76,16 +76,15 @@ func (s *service) GetEstimatedCredits(actions []Action) int {
 	return total
 }
 
-func (s *service) GetRechargeHistory(ctx context.Context, orgID string, referenceID *string) ([]*models.CreditLedgerEntry, error) {
-	entryType := string(LedgerTypeCredit)
-	return s.repo.ListCreditLedgerEntries(ctx, orgID, referenceID, &entryType)
+func (s *service) GetRechargeHistory(ctx context.Context, orgID string) ([]*models.CreditLedgerEntry, error) {
+	return s.repo.ListCreditLedgerEntries(ctx, orgID)
 }
 
 func (s *service) GrantInitialCredits(ctx context.Context, orgID string) error {
 	_, err := s.repo.CreateCreditLedgerEntry(ctx, &models.CreditLedgerEntry{
 		OrganizationID: orgID,
 		Type:           string(LedgerTypeCredit),
-		Action:         string(ActionScriptGeneration),
+		Action:         string(ActionTopUp),
 		Cost:           0,
 		Amount:         DefaultFreeCredits,
 		Metadata:       models.CreditLedgerMetadata{},
@@ -97,47 +96,55 @@ func (s *service) GrantInitialCredits(ctx context.Context, orgID string) error {
 	return nil
 }
 
-func creditsFromUsage(usage baml.Usage, pricing Pricing) (int, error) {
+func creditLedgerUsage(usage Usage) (models.CreditLedgerUsage, error) {
 	if usage == nil {
-		return 0, nil
+		return models.CreditLedgerUsage{}, nil
 	}
 
 	inputTokens, err := usage.InputTokens()
 	if err != nil {
-		return 0, fmt.Errorf("input tokens: %w", err)
+		return models.CreditLedgerUsage{}, fmt.Errorf("input tokens: %w", err)
 	}
 	outputTokens, err := usage.OutputTokens()
 	if err != nil {
-		return 0, fmt.Errorf("output tokens: %w", err)
+		return models.CreditLedgerUsage{}, fmt.Errorf("output tokens: %w", err)
 	}
 	cachedInputTokens, err := usage.CachedInputTokens()
 	if err != nil {
-		return 0, fmt.Errorf("cached input tokens: %w", err)
+		return models.CreditLedgerUsage{}, fmt.Errorf("cached input tokens: %w", err)
 	}
 
+	return models.CreditLedgerUsage{
+		InputTokens:       inputTokens,
+		OutputTokens:      outputTokens,
+		CachedInputTokens: cachedInputTokens,
+	}, nil
+}
+
+func creditsFromUsage(usage models.CreditLedgerUsage, pricing Pricing) int {
 	costUSD := 0.0
-	costUSD += (float64(inputTokens) / 1_000_000.0) * pricing.InputCostPer1MTokens
-	costUSD += (float64(outputTokens) / 1_000_000.0) * pricing.OutputCostPer1MTokens
-	costUSD += (float64(cachedInputTokens) / 1_000_000.0) * pricing.CachedCostPer1MTokens
+	costUSD += (float64(usage.InputTokens) / 1_000_000.0) * pricing.InputCostPer1MTokens
+	costUSD += (float64(usage.OutputTokens) / 1_000_000.0) * pricing.OutputCostPer1MTokens
+	costUSD += (float64(usage.CachedInputTokens) / 1_000_000.0) * pricing.CachedCostPer1MTokens
 	if costUSD <= 0 {
-		return 0, nil
+		return 0
 	}
 
-	return int(math.Ceil(costUSD * 100)), nil
+	return int(math.Ceil(costUSD * 100))
 }
 
 func organizationIDFromContext(ctx context.Context) (string, error) {
-	if orgID, ok := ctx.Value(common.OrgIDKey).(string); ok && orgID != "" {
+	if orgID, ok := ctx.Value(auth.OrgIDKey).(string); ok && orgID != "" {
 		return orgID, nil
 	}
 	return "", ErrMissingOrganizationID
 }
 
 func referenceIDFromContext(ctx context.Context) *string {
-	if videoID, ok := ctx.Value(common.VideoIDKey).(string); ok && videoID != "" {
+	if videoID, ok := ctx.Value(auth.VideoIDKey).(string); ok && videoID != "" {
 		return &videoID
 	}
-	if sceneID, ok := ctx.Value(common.SceneIDKey).(string); ok && sceneID != "" {
+	if sceneID, ok := ctx.Value(auth.SceneIDKey).(string); ok && sceneID != "" {
 		return &sceneID
 	}
 	return nil

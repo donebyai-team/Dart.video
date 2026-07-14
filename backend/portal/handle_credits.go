@@ -1,10 +1,8 @@
 package portal
 
 import (
-	"context"
-	"strings"
-
 	"connectrpc.com/connect"
+	"context"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -15,20 +13,14 @@ func (p *Portal) GetCredits(ctx context.Context, c *connect.Request[pbcore.GetCr
 		return nil, err
 	}
 
-	var referenceID *string
-	if strings.TrimSpace(c.Msg.GetReferenceID()) != "" {
-		referenceIDValue := strings.TrimSpace(c.Msg.GetReferenceID())
-		referenceID = &referenceIDValue
-	}
-
-	available, err := p.creditsService.GetAvailableCredits(ctx, actor.OrganizationID, referenceID)
+	available, err := p.creditsService.GetAvailableCredits(ctx, actor.OrganizationID, c.Msg.ReferenceID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	resp := &pbcore.GetCreditsResponse{Available: int32(available)}
 	if c.Msg.GetLedger() {
-		entries, err := p.creditsService.GetRechargeHistory(ctx, actor.OrganizationID, referenceID)
+		entries, err := p.creditsService.GetRechargeHistory(ctx, actor.OrganizationID)
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}

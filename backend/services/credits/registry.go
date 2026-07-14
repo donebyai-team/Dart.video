@@ -11,9 +11,9 @@ const (
 type Pricing struct {
 	Provider              string
 	Model                 string
-	InputCostPer1MTokens  float64
-	OutputCostPer1MTokens float64
-	CachedCostPer1MTokens float64
+	InputCostPer1MTokens  float64 // in dollars
+	OutputCostPer1MTokens float64 // in dollars
+	CachedCostPer1MTokens float64 // in dollars
 }
 
 type ActionConfig struct {
@@ -23,9 +23,9 @@ type ActionConfig struct {
 }
 
 var providerPricingRegistry = map[string]Pricing{
-	pricingKey("openai", "gpt-5.6"): {
+	pricingKey("openai", "gpt-4o-mini"): {
 		Provider:              "openai",
-		Model:                 "gpt-5.6",
+		Model:                 "gpt-4o-mini",
 		InputCostPer1MTokens:  2.40,
 		OutputCostPer1MTokens: 8.20,
 		CachedCostPer1MTokens: 0.80,
@@ -37,14 +37,14 @@ var providerPricingRegistry = map[string]Pricing{
 		OutputCostPer1MTokens: 6.40,
 		CachedCostPer1MTokens: 0.60,
 	},
-	pricingKey("gemini", "gemini-3.1-pro-preview"): {
+	pricingKey("google-ai", "gemini-3.1-pro-preview"): {
 		Provider:              "gemini",
 		Model:                 "gemini-3.1-pro-preview",
 		InputCostPer1MTokens:  1.35,
 		OutputCostPer1MTokens: 5.10,
 		CachedCostPer1MTokens: 0.35,
 	},
-	pricingKey("gemini", "gemini-3-pro"): {
+	pricingKey("google-ai", "gemini-3-pro"): {
 		Provider:              "gemini",
 		Model:                 "gemini-3-pro",
 		InputCostPer1MTokens:  1.10,
@@ -92,7 +92,14 @@ var actionRegistry = map[Action]ActionConfig{
 }
 
 func pricingKey(provider, model string) string {
-	return strings.ToLower(strings.TrimSpace(provider)) + "::" + strings.ToLower(strings.TrimSpace(model))
+	provider = strings.ToLower(strings.TrimSpace(provider))
+	model = strings.ToLower(strings.TrimSpace(model))
+
+	if provider == "openai-responses" {
+		provider = "openai"
+	}
+
+	return provider + "::" + model
 }
 
 func getPricing(provider, model string) (Pricing, bool) {

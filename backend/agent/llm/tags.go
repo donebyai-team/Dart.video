@@ -2,18 +2,18 @@ package llm
 
 import (
 	"context"
-	"github.com/shank318/coasterai/agent/common"
+	"github.com/shank318/coasterai/auth"
 )
 
 func getTagsForBamlStudio(ctx context.Context) map[string]string {
 	tags := make(map[string]string)
 
-	if traceID, ok := ctx.Value(common.VideoIDKey).(string); ok {
-		tags[string(common.VideoIDKey)] = traceID
+	if traceID, ok := ctx.Value(auth.VideoIDKey).(string); ok {
+		tags[string(auth.VideoIDKey)] = traceID
 	}
 
-	if traceID, ok := ctx.Value(common.SceneIDKey).(string); ok {
-		tags[string(common.SceneIDKey)] = traceID
+	if traceID, ok := ctx.Value(auth.SceneIDKey).(string); ok {
+		tags[string(auth.SceneIDKey)] = traceID
 	}
 
 	return tags

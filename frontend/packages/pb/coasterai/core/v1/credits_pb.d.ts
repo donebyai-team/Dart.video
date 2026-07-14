@@ -42,9 +42,9 @@ export declare const CreditLedgerEntrySchema: GenMessage<CreditLedgerEntry>;
  */
 export declare type GetCreditsRequest = Message<"coasterai.core.v1.GetCreditsRequest"> & {
   /**
-   * @generated from field: string referenceID = 1;
+   * @generated from field: optional string referenceID = 1;
    */
-  referenceID: string;
+  referenceID?: string;
 
   /**
    * @generated from field: bool ledger = 2;

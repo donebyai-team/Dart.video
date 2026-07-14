@@ -85,7 +85,7 @@ func (x *CreditLedgerEntry) GetAmount() int32 {
 
 type GetCreditsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ReferenceID   string                 `protobuf:"bytes,1,opt,name=referenceID,proto3" json:"referenceID,omitempty"`
+	ReferenceID   *string                `protobuf:"bytes,1,opt,name=referenceID,proto3,oneof" json:"referenceID,omitempty"`
 	Ledger        bool                   `protobuf:"varint,2,opt,name=ledger,proto3" json:"ledger,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -122,8 +122,8 @@ func (*GetCreditsRequest) Descriptor() ([]byte, []int) {
 }
 
 func (x *GetCreditsRequest) GetReferenceID() string {
-	if x != nil {
-		return x.ReferenceID
+	if x != nil && x.ReferenceID != nil {
+		return *x.ReferenceID
 	}
 	return ""
 }
@@ -196,10 +196,11 @@ const file_coasterai_core_v1_credits_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x129\n" +
 	"\n" +
 	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x16\n" +
-	"\x06amount\x18\x03 \x01(\x05R\x06amount\"M\n" +
-	"\x11GetCreditsRequest\x12 \n" +
-	"\vreferenceID\x18\x01 \x01(\tR\vreferenceID\x12\x16\n" +
-	"\x06ledger\x18\x02 \x01(\bR\x06ledger\"r\n" +
+	"\x06amount\x18\x03 \x01(\x05R\x06amount\"b\n" +
+	"\x11GetCreditsRequest\x12%\n" +
+	"\vreferenceID\x18\x01 \x01(\tH\x00R\vreferenceID\x88\x01\x01\x12\x16\n" +
+	"\x06ledger\x18\x02 \x01(\bR\x06ledgerB\x0e\n" +
+	"\f_referenceID\"r\n" +
 	"\x12GetCreditsResponse\x12\x1c\n" +
 	"\tavailable\x18\x01 \x01(\x05R\tavailable\x12>\n" +
 	"\aentries\x18\x02 \x03(\v2$.coasterai.core.v1.CreditLedgerEntryR\aentriesB;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
@@ -238,6 +239,7 @@ func file_coasterai_core_v1_credits_proto_init() {
 	if File_coasterai_core_v1_credits_proto != nil {
 		return
 	}
+	file_coasterai_core_v1_credits_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

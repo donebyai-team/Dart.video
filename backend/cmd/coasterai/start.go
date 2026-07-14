@@ -195,7 +195,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		return nil, errors.Wrap(err, "unable to create render video service")
 	}
 
-	googleProvider := providers.NewProviderGoogle(sflags.MustGetString(cmd, "common-google-api-key"), deps.MediaStore, zlog)
+	googleProvider := providers.NewProviderGoogle(sflags.MustGetString(cmd, "common-google-api-key"), deps.MediaStore, creditService, zlog)
 	fireCrawlClient := providers.NewFireCrawlClient(sflags.MustGetString(cmd, "common-firecrawl-api-key"))
 
 	p := portal.New(

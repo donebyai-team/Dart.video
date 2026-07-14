@@ -64,7 +64,7 @@ func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset)
 		return nil, agenterrors.AssetAnalysisFailed("failed to analyze asset image", err)
 	}
 
-	l.chargeUsage(ctx, l.logger, collector, providerModel{provider: "gemini", model: "gemini-3.1-pro-preview"}, credits.ActionAnalyzeImage)
+	l.chargeUsage(ctx, collector, credits.ActionAnalyzeImage)
 
 	analyisObj, err := json.Marshal(result)
 	if err != nil {

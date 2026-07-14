@@ -75,9 +75,9 @@ func (i *CreditsInterceptor) checkCredits(ctx context.Context, procedure string)
 	}
 
 	required := i.service.GetEstimatedCredits(actions)
-	if available < required {
-		return ctx, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("insufficient credits: available %d, required %d", available, required))
+	if available == 0 || (available < required) {
+		return ctx, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("insufficient credits"))
 	}
 
-	return creditsvc.WithAvailableCredits(ctx, available), nil
+	return ctx, nil
 }

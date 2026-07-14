@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql/driver"
-	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 	"time"
 )
 
@@ -18,11 +17,17 @@ type CreditLedgerEntry struct {
 	CreatedAt      time.Time            `db:"created_at"`
 }
 
+type CreditLedgerUsage struct {
+	InputTokens       int64 `json:"input_tokens"`
+	OutputTokens      int64 `json:"output_tokens"`
+	CachedInputTokens int64 `json:"cached_input_tokens"`
+}
+
 type CreditLedgerMetadata struct {
-	Provider   string     `json:"provider"`
-	Model      string     `json:"model"`
-	Usage      baml.Usage `json:"usage"`
-	Multiplier int        `json:"multiplier"`
+	Provider   string            `json:"provider"`
+	Model      string            `json:"model"`
+	Usage      CreditLedgerUsage `json:"usage"`
+	Multiplier int               `json:"multiplier"`
 }
 
 func (b CreditLedgerMetadata) Value() (driver.Value, error) {
