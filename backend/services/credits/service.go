@@ -6,6 +6,7 @@ import (
 	"github.com/shank318/coasterai/auth"
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
+	"github.com/shank318/coasterai/services/templates"
 	"go.uber.org/zap"
 	"math"
 )
@@ -152,7 +153,8 @@ func organizationIDFromContext(ctx context.Context) (string, error) {
 
 func referenceIDFromContext(ctx context.Context) *string {
 	if videoID, ok := ctx.Value(auth.VideoIDKey).(string); ok && videoID != "" {
-		return &videoID
+		resourceID, _ := templates.ParseResourceID(videoID)
+		return &resourceID
 	}
 	if sceneID, ok := ctx.Value(auth.SceneIDKey).(string); ok && sceneID != "" {
 		return &sceneID

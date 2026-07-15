@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/shank318/coasterai/models"
 	"regexp"
 
@@ -27,13 +28,14 @@ func (l *llmService) chargeUsage(ctx context.Context, collector baml_client.Coll
 
 			request, _ := call.HttpRequest()
 			if request != nil {
-				// Try body first.
+				// Try body first., don't use body.JSON() it panic, baml bug
 				if body, err := request.Body(); err == nil && body != nil {
-					if jsonBody, err := body.JSON(); err == nil {
-						if m, ok := jsonBody.(map[string]any); ok {
-							if v, ok := m["model"].(string); ok {
-								model = v
-							}
+					if text, err := body.Text(); err == nil {
+						var payload struct {
+							Model string `json:"model"`
+						}
+						if err := json.Unmarshal([]byte(text), &payload); err == nil {
+							model = payload.Model
 						}
 					}
 				}
