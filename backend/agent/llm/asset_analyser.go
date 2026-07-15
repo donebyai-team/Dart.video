@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
+	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
@@ -24,9 +25,9 @@ func assetCacheKey(assetID string) string {
 	return fmt.Sprintf("%s:%s", assetAnalysisKeyPrefix, assetID)
 }
 
-func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset) (*types.AssetAnalysis, error) {
+func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset) (*common.LLMResponse[types.AssetAnalysis], error) {
 	if asset.MediaType != pbcore.MediaType_MEDIA_TYPE_IMAGE {
-		return &types.AssetAnalysis{}, nil
+		return &common.LLMResponse[types.AssetAnalysis]{}, nil
 	}
 	cacheKey := assetCacheKey(asset.ID)
 	analysedAsset, err := l.cache.GetKey(ctx, cacheKey)
@@ -41,7 +42,9 @@ func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset)
 		if err := json.Unmarshal([]byte(analysedAsset), cachedAsset); err != nil {
 			l.logger.Error("unmarshal failed for key", zap.String("key", cacheKey), zap.Error(err))
 		} else {
-			return cachedAsset, nil
+			return &common.LLMResponse[types.AssetAnalysis]{
+				Response: *cachedAsset,
+			}, nil
 		}
 	}
 
@@ -64,17 +67,22 @@ func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset)
 		return nil, agenterrors.AssetAnalysisFailed("failed to analyze asset image", err)
 	}
 
-	l.chargeUsage(ctx, collector, credits.ActionAnalyzeImage)
+	usage := l.chargeUsage(ctx, collector, credits.ActionAnalyzeImage)
+
+	response := &common.LLMResponse[types.AssetAnalysis]{
+		Response: result,
+		Usage:    usage,
+	}
 
 	analyisObj, err := json.Marshal(result)
 	if err != nil {
 		l.logger.Error("failed to marshal analysis result", zap.Error(err))
-		return &result, nil
+		return response, nil
 	}
 
 	if err := l.cache.SetKey(ctx, cacheKey, string(analyisObj), assetAnalysisCacheTTL); err != nil {
 		l.logger.Error("failed to cache analysis result", zap.Error(err))
 	}
 
-	return &result, nil
+	return response, nil
 }

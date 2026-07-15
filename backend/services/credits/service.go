@@ -19,20 +19,20 @@ func NewService(repo datastore.Repository, logger *zap.Logger) Service {
 	return &service{repo: repo, logger: logger.Named("credits")}
 }
 
-func (s *service) ChargeCredits(ctx context.Context, input ChargeCreditsInput) error {
+func (s *service) ChargeCredits(ctx context.Context, input ChargeCreditsInput) (*models.CreditLedgerEntry, error) {
 	orgID, err := organizationIDFromContext(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	pricing, found := getPricing(input.Provider, input.Model)
 	if !found {
-		return fmt.Errorf("pricing not found for provider=%s model=%s", input.Provider, input.Model)
+		return nil, fmt.Errorf("pricing not found for provider=%s model=%s", input.Provider, input.Model)
 	}
 
 	usage, err := creditLedgerUsage(input.Usage)
 	if err != nil {
-		return fmt.Errorf("credit ledger usage: %w", err)
+		return nil, fmt.Errorf("credit ledger usage: %w", err)
 	}
 	originalAmount := creditsFromUsage(usage, pricing)
 	cfg := getActionConfig(input.Action)
@@ -48,7 +48,7 @@ func (s *service) ChargeCredits(ctx context.Context, input ChargeCreditsInput) e
 		Multiplier: cfg.Multiplier,
 	}
 
-	_, err = s.repo.CreateCreditLedgerEntry(ctx, &models.CreditLedgerEntry{
+	entry, err := s.repo.CreateCreditLedgerEntry(ctx, &models.CreditLedgerEntry{
 		OrganizationID: orgID,
 		ReferenceID:    referenceIDFromContext(ctx),
 		Type:           string(LedgerTypeDebit),
@@ -58,10 +58,13 @@ func (s *service) ChargeCredits(ctx context.Context, input ChargeCreditsInput) e
 		Metadata:       metadata,
 	})
 	if err != nil {
-		return fmt.Errorf("create credit ledger debit entry: %w", err)
+		return nil, fmt.Errorf("create credit ledger debit entry: %w", err)
 	}
 
-	return nil
+	s.logger.Info("credits charged",
+		zap.Any("credits", entry))
+
+	return entry, nil
 }
 
 func (s *service) GetAvailableCredits(ctx context.Context, orgID string, referenceID *string) (int, error) {

@@ -197,6 +197,7 @@ type ConversationMessage struct {
 	DurationInFrames *int32                  `protobuf:"varint,10,opt,name=durationInFrames,proto3,oneof" json:"durationInFrames,omitempty"`
 	Id               string                  `protobuf:"bytes,11,opt,name=id,proto3" json:"id,omitempty"`
 	ManualEdits      *structpb.Struct        `protobuf:"bytes,12,opt,name=manualEdits,proto3,oneof" json:"manualEdits,omitempty"`
+	Credits          int32                   `protobuf:"varint,13,opt,name=credits,proto3" json:"credits,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -315,11 +316,18 @@ func (x *ConversationMessage) GetManualEdits() *structpb.Struct {
 	return nil
 }
 
+func (x *ConversationMessage) GetCredits() int32 {
+	if x != nil {
+		return x.Credits
+	}
+	return 0
+}
+
 var File_coasterai_core_v1_chat_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\x90\x05\n" +
+	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xaa\x05\n" +
 	"\x13ConversationMessage\x127\n" +
 	"\x04role\x18\x01 \x01(\x0e2#.coasterai.core.v1.ConversationRoleR\x04role\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1a\n" +
@@ -334,7 +342,8 @@ const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\x10durationInFrames\x18\n" +
 	" \x01(\x05H\x02R\x10durationInFrames\x88\x01\x01\x12\x0e\n" +
 	"\x02id\x18\v \x01(\tR\x02id\x12>\n" +
-	"\vmanualEdits\x18\f \x01(\v2\x17.google.protobuf.StructH\x03R\vmanualEdits\x88\x01\x01B\n" +
+	"\vmanualEdits\x18\f \x01(\v2\x17.google.protobuf.StructH\x03R\vmanualEdits\x88\x01\x01\x12\x18\n" +
+	"\acredits\x18\r \x01(\x05R\acreditsB\n" +
 	"\n" +
 	"\b_aiModelB\x12\n" +
 	"\x10_defaultCodeDataB\x13\n" +

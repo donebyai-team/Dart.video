@@ -131,12 +131,6 @@ export default function ScenePromptComposer({ setOverlay, defaultAIModel, onConv
   const canSubmit = prompt.trim().length > 0
 
   useEffect(() => {
-    if (selectedSlide) {
-      setPrompt(selectedSlide.content?.plan?.selectedTemplateDescription || '')
-    }
-  }, [selectedSlide])
-
-  useEffect(() => {
     setSelectedAIModel(defaultAIModel)
   }, [defaultAIModel])
 

@@ -11,8 +11,8 @@ type CreditLedgerEntry struct {
 	ReferenceID    *string              `db:"reference_id"`
 	Type           string               `db:"type"`
 	Action         string               `db:"action"`
-	Cost           int                  `db:"cost"`
-	Amount         int                  `db:"amount"`
+	Cost           int                  `db:"cost"`   // cost incurred
+	Amount         int                  `db:"amount"` // amount charged after margin
 	Metadata       CreditLedgerMetadata `db:"metadata"`
 	CreatedAt      time.Time            `db:"created_at"`
 }

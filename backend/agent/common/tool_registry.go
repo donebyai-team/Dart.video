@@ -32,20 +32,19 @@ func NewToolRegistry(
 
 func (a *ToolRegistry) HandleScriptPlanner(ctx context.Context,
 	session *SessionContext,
-	llmResponse *types.Union3ListAskUserQuestionOrScriptOrToolExtractContent,
-	thinkingSummary *string,
+	llmResponse LLMResponse[types.Union3ListAskUserQuestionOrScriptOrToolExtractContent],
 	assetRegistry *services.MediaAssetRegistry) (*RunResult, error) {
 
-	if llmResponse.IsListAskUserQuestion() {
-		if llmResponse.AsListAskUserQuestion() == nil {
+	if llmResponse.Response.IsListAskUserQuestion() {
+		if llmResponse.Response.AsListAskUserQuestion() == nil {
 			return nil, errors.New("questions are invalid")
 		}
-		return a.handleAskQuestion(ctx, session, llmResponse.AsListAskUserQuestion(), thinkingSummary, assetRegistry)
+		return a.handleAskQuestion(ctx, session, llmResponse.Response.AsListAskUserQuestion(), llmResponse.Summary, assetRegistry)
 	}
 
-	if llmResponse.IsScript() && llmResponse.AsScript() != nil {
+	if llmResponse.Response.IsScript() && llmResponse.Response.AsScript() != nil {
 		script := pbcore.Script{}
-		bamlScript := *llmResponse.AsScript()
+		bamlScript := *llmResponse.Response.AsScript()
 		for _, scriptItem := range bamlScript.Sections {
 			script.Items = append(script.Items, &pbcore.ScriptItem{
 				Name:      string(scriptItem.Name),
@@ -65,8 +64,8 @@ func (a *ToolRegistry) HandleScriptPlanner(ctx context.Context,
 		}, nil
 	}
 
-	if llmResponse.IsToolExtractContent() && llmResponse.AsToolExtractContent() != nil {
-		return a.handleExtractContent(ctx, session, llmResponse.AsToolExtractContent(), thinkingSummary, assetRegistry)
+	if llmResponse.Response.IsToolExtractContent() && llmResponse.Response.AsToolExtractContent() != nil {
+		return a.handleExtractContent(ctx, session, llmResponse.Response.AsToolExtractContent(), llmResponse.Summary, assetRegistry)
 	}
 
 	return nil, errors.New("llmResponse is invalid")
@@ -75,21 +74,17 @@ func (a *ToolRegistry) HandleScriptPlanner(ctx context.Context,
 func (a *ToolRegistry) HandleAnimationGeneration(
 	ctx context.Context,
 	session *SessionContext,
-	llmResponse *types.Union2AskUserQuestionOrGenerateAnimationCodeResponse,
-	thinkingSummary *string,
+	llmResponse LLMResponse[types.Union2AskUserQuestionOrGenerateAnimationCodeResponse],
 	assetRegistry *services.MediaAssetRegistry) (*RunResult, error) {
-	if llmResponse == nil {
-		return nil, errors.New("llmResponse is nil")
-	}
 
-	if llmResponse.IsAskUserQuestion() {
-		if llmResponse.AsAskUserQuestion() == nil {
+	if llmResponse.Response.IsAskUserQuestion() {
+		if llmResponse.Response.AsAskUserQuestion() == nil {
 			return nil, errors.New("questions are invalid")
 		}
-		return a.handleAskQuestion(ctx, session, &[]types.AskUserQuestion{*llmResponse.AsAskUserQuestion()}, thinkingSummary, assetRegistry)
+		return a.handleAskQuestion(ctx, session, &[]types.AskUserQuestion{*llmResponse.Response.AsAskUserQuestion()}, llmResponse.Summary, assetRegistry)
 	}
 
-	if llmResponse.IsGenerateAnimationCodeResponse() && llmResponse.AsGenerateAnimationCodeResponse() != nil {
+	if llmResponse.Response.IsGenerateAnimationCodeResponse() && llmResponse.Response.AsGenerateAnimationCodeResponse() != nil {
 		return &RunResult{
 			Status: RunStatusCompleted,
 		}, nil

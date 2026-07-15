@@ -28,6 +28,7 @@ type CreditLedgerEntry struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	Amount        int32                  `protobuf:"varint,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	Action        string                 `protobuf:"bytes,4,opt,name=action,proto3" json:"action,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -81,6 +82,13 @@ func (x *CreditLedgerEntry) GetAmount() int32 {
 		return x.Amount
 	}
 	return 0
+}
+
+func (x *CreditLedgerEntry) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
 }
 
 type GetCreditsRequest struct {
@@ -191,12 +199,13 @@ var File_coasterai_core_v1_credits_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_credits_proto_rawDesc = "" +
 	"\n" +
-	"\x1fcoasterai/core/v1/credits.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"v\n" +
+	"\x1fcoasterai/core/v1/credits.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\x8e\x01\n" +
 	"\x11CreditLedgerEntry\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x129\n" +
 	"\n" +
 	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x16\n" +
-	"\x06amount\x18\x03 \x01(\x05R\x06amount\"b\n" +
+	"\x06amount\x18\x03 \x01(\x05R\x06amount\x12\x16\n" +
+	"\x06action\x18\x04 \x01(\tR\x06action\"b\n" +
 	"\x11GetCreditsRequest\x12%\n" +
 	"\vreferenceID\x18\x01 \x01(\tH\x00R\vreferenceID\x88\x01\x01\x12\x16\n" +
 	"\x06ledger\x18\x02 \x01(\bR\x06ledgerB\x0e\n" +

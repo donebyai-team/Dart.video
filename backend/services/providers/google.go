@@ -142,7 +142,7 @@ func (l *ProviderGoogle) chargeUsage(ctx context.Context, usageMeta *genai.Gener
 		Action:   creditsvc.ActionVoiceGeneration,
 	}
 
-	if err := l.creditsService.ChargeCredits(ctx, input); err != nil {
+	if _, err := l.creditsService.ChargeCredits(ctx, input); err != nil {
 		l.logger.Error("failed to charge credits", zap.Error(err), zap.Any("usage", input))
 	}
 }

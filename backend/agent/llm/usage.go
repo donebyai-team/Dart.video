@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"github.com/shank318/coasterai/models"
 	"regexp"
 
 	"github.com/shank318/coasterai/baml_client"
@@ -9,11 +10,11 @@ import (
 	"go.uber.org/zap"
 )
 
-func (l *llmService) chargeUsage(ctx context.Context, collector baml_client.Collector, action creditsvc.Action) {
+func (l *llmService) chargeUsage(ctx context.Context, collector baml_client.Collector, action creditsvc.Action) *models.CreditLedgerEntry {
 	usage, err := collector.Usage()
 	if err != nil {
 		l.logger.Error("Failed to get usage information", zap.Error(err))
-		return
+		return nil
 	}
 
 	var provider, model string
@@ -49,12 +50,17 @@ func (l *llmService) chargeUsage(ctx context.Context, collector baml_client.Coll
 		}
 	}
 
-	if err := l.creditsService.ChargeCredits(ctx, creditsvc.ChargeCreditsInput{
+	entry, err := l.creditsService.ChargeCredits(ctx, creditsvc.ChargeCreditsInput{
 		Provider: provider,
 		Model:    model,
 		Usage:    usage,
 		Action:   action,
-	}); err != nil {
+	})
+
+	if err != nil {
 		l.logger.Error("failed to charge credits", zap.Error(err), zap.String("provider", provider), zap.String("model", model), zap.String("action", string(action)))
+		return nil
 	}
+
+	return entry
 }

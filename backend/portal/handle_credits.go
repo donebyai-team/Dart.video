@@ -31,6 +31,7 @@ func (p *Portal) GetCredits(ctx context.Context, c *connect.Request[pbcore.GetCr
 				Id:        entry.ID,
 				CreatedAt: timestamppb.New(entry.CreatedAt),
 				Amount:    int32(entry.Amount),
+				Action:    entry.Action,
 			})
 		}
 	}

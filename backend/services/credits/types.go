@@ -29,7 +29,7 @@ const (
 var ErrMissingOrganizationID = errors.New("missing organization id")
 
 type Service interface {
-	ChargeCredits(ctx context.Context, input ChargeCreditsInput) error
+	ChargeCredits(ctx context.Context, input ChargeCreditsInput) (*models.CreditLedgerEntry, error)
 	GetAvailableCredits(ctx context.Context, orgID string, referenceID *string) (int, error)
 	GetEstimatedCredits(actions []Action) int
 	GetRechargeHistory(ctx context.Context, orgID string) ([]*models.CreditLedgerEntry, error)

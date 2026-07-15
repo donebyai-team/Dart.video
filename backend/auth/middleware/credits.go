@@ -15,10 +15,10 @@ var _ connect.Interceptor = (*CreditsInterceptor)(nil)
 
 var creditProtectedProcedures = map[string][]creditsvc.Action{
 	pbportalconnect.PortalServiceCreateVideoProcedure:           {creditsvc.ActionAnalyzeImage, creditsvc.ActionScriptGeneration, creditsvc.ActionScenesGeneration},
-	pbportalconnect.PortalServiceContinueVideoPlanningProcedure: {creditsvc.ActionAnalyzeImage, creditsvc.ActionScriptGeneration, creditsvc.ActionScenesGeneration},
+	pbportalconnect.PortalServiceContinueVideoPlanningProcedure: {},
 	pbportalconnect.PortalServiceGenerateOrEditSceneProcedure:   {creditsvc.ActionAnimationGeneration},
-	pbportalconnect.PortalServiceGenerateSuggestionsProcedure:   {creditsvc.ActionCategorizeScene},
-	pbportalconnect.PortalServiceRenderSuggestionProcedure:      {creditsvc.ActionExtractTemplateConfig},
+	pbportalconnect.PortalServiceGenerateSuggestionsProcedure:   {creditsvc.ActionCategorizeScene, creditsvc.ActionExtractTemplateConfig},
+	pbportalconnect.PortalServiceRenderSuggestionProcedure:      {},
 	pbportalconnect.PortalServiceGenerateVoiceoverProcedure:     {creditsvc.ActionVoiceGeneration},
 }
 

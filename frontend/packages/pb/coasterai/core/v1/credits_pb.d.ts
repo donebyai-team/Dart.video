@@ -29,6 +29,11 @@ export declare type CreditLedgerEntry = Message<"coasterai.core.v1.CreditLedgerE
    * @generated from field: int32 amount = 3;
    */
   amount: number;
+
+  /**
+   * @generated from field: string action = 4;
+   */
+  action: string;
 };
 
 /**

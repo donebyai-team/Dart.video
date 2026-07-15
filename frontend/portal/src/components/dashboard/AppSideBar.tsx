@@ -6,6 +6,7 @@ import {
     Home,
     Palette,
     Wand2,
+    CreditCard,
 } from "lucide-react";
 import {
     Sidebar,
@@ -53,6 +54,12 @@ export function AppSidebar() {
             icon: Palette,
             path: "/dashboard/brand",
             active: isActive("/dashboard/brand"),
+        },
+         {
+            title: "Billing",
+            icon: CreditCard,
+            path: "/dashboard/billing",
+            active: isActive("/dashboard/billing"),
         }
     ];
 

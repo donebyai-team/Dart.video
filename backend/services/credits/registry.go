@@ -4,8 +4,8 @@ import "strings"
 
 const (
 	DefaultMultiplier   = 5
-	DefaultFreeCredits  = 500
-	DefaultActionCharge = 30
+	DefaultFreeCredits  = 500 // 500 credits = 5$
+	DefaultActionCharge = 10
 )
 
 type Pricing struct {
@@ -26,66 +26,73 @@ var providerPricingRegistry = map[string]Pricing{
 	pricingKey("openai", "gpt-4o-mini"): {
 		Provider:              "openai",
 		Model:                 "gpt-4o-mini",
-		InputCostPer1MTokens:  2.40,
-		OutputCostPer1MTokens: 8.20,
-		CachedCostPer1MTokens: 0.80,
+		InputCostPer1MTokens:  0.15,
+		OutputCostPer1MTokens: 0.60,
+		CachedCostPer1MTokens: 0.075,
+	},
+	pricingKey("openai", "gpt-5.6-sol"): {
+		Provider:              "openai",
+		Model:                 "gpt-5.6-sol",
+		InputCostPer1MTokens:  5,
+		OutputCostPer1MTokens: 30,
+		CachedCostPer1MTokens: 0.50,
 	},
 	pricingKey("openai", "gpt-5.5"): {
 		Provider:              "openai",
 		Model:                 "gpt-5.5",
-		InputCostPer1MTokens:  1.90,
-		OutputCostPer1MTokens: 6.40,
-		CachedCostPer1MTokens: 0.60,
+		InputCostPer1MTokens:  5,
+		OutputCostPer1MTokens: 30,
+		CachedCostPer1MTokens: 0.50,
 	},
 	pricingKey("google-ai", "gemini-3.1-pro-preview"): {
-		Provider:              "gemini",
+		Provider:              "google-ai",
 		Model:                 "gemini-3.1-pro-preview",
-		InputCostPer1MTokens:  1.35,
-		OutputCostPer1MTokens: 5.10,
-		CachedCostPer1MTokens: 0.35,
+		InputCostPer1MTokens:  2.0,
+		OutputCostPer1MTokens: 12.0,
+		CachedCostPer1MTokens: 0.20,
 	},
-	pricingKey("google-ai", "gemini-3-pro"): {
-		Provider:              "gemini",
-		Model:                 "gemini-3-pro",
-		InputCostPer1MTokens:  1.10,
-		OutputCostPer1MTokens: 4.60,
-		CachedCostPer1MTokens: 0.25,
+	pricingKey("google-ai", "gemini-2.5-flash-lite"): {
+		Provider:              "google-ai",
+		Model:                 "gemini-2.5-flash-lite",
+		InputCostPer1MTokens:  0.10,
+		OutputCostPer1MTokens: 0.40,
+		CachedCostPer1MTokens: 0.01,
 	},
 }
 
 var actionRegistry = map[Action]ActionConfig{
 	ActionScriptGeneration: {
-		EstimatedCredits: DefaultActionCharge,
+		EstimatedCredits: DefaultActionCharge * DefaultMultiplier,
 		Multiplier:       DefaultMultiplier,
 		ChargeEnabled:    true,
 	},
 	ActionScenesGeneration: {
-		EstimatedCredits: DefaultActionCharge,
+		EstimatedCredits: DefaultActionCharge * DefaultMultiplier,
 		Multiplier:       DefaultMultiplier,
 		ChargeEnabled:    true,
 	},
 	ActionAnimationGeneration: {
-		EstimatedCredits: DefaultActionCharge,
+		EstimatedCredits: DefaultActionCharge * DefaultMultiplier,
 		Multiplier:       DefaultMultiplier,
 		ChargeEnabled:    true,
 	},
 	ActionCategorizeScene: {
-		EstimatedCredits: DefaultActionCharge,
+		EstimatedCredits: 1 * DefaultMultiplier,
 		Multiplier:       DefaultMultiplier,
 		ChargeEnabled:    true,
 	},
 	ActionVoiceGeneration: {
-		EstimatedCredits: DefaultActionCharge,
+		EstimatedCredits: DefaultActionCharge * DefaultMultiplier,
 		Multiplier:       DefaultMultiplier,
 		ChargeEnabled:    true,
 	},
 	ActionAnalyzeImage: {
-		EstimatedCredits: DefaultActionCharge,
+		EstimatedCredits: 1 * DefaultMultiplier,
 		Multiplier:       DefaultMultiplier,
 		ChargeEnabled:    true,
 	},
 	ActionExtractTemplateConfig: {
-		EstimatedCredits: DefaultActionCharge,
+		EstimatedCredits: 1 * DefaultMultiplier,
 		Multiplier:       DefaultMultiplier,
 		ChargeEnabled:    true,
 	},
