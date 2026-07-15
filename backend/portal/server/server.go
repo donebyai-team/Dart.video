@@ -10,6 +10,7 @@ import (
 	"github.com/shank318/coasterai/errorx"
 	"github.com/shank318/coasterai/pb/coasterai/portal/v1/pbportalconnect"
 	"github.com/shank318/coasterai/portal/server/handlers"
+	"github.com/shank318/coasterai/services/credits"
 	"net/http"
 	"regexp"
 	"strings"
@@ -31,6 +32,7 @@ type Server struct {
 	*shutter.Shutter
 	httpListenAddr    string
 	authenticator     *auth.Authenticator
+	creditsService    credits.Service
 	corsURLRegexAllow *regexp.Regexp
 	isAppReady        func() bool
 	logger            *zap.Logger
@@ -39,6 +41,7 @@ type Server struct {
 func New(
 	httpListenAddr string,
 	authenticator *auth.Authenticator,
+	creditsService credits.Service,
 	corsURLRegexAllow *regexp.Regexp,
 	isAppReady func() bool,
 	logger *zap.Logger,
@@ -46,6 +49,7 @@ func New(
 	return &Server{
 		Shutter:           shutter.New(),
 		authenticator:     authenticator,
+		creditsService:    creditsService,
 		httpListenAddr:    httpListenAddr,
 		corsURLRegexAllow: corsURLRegexAllow,
 		isAppReady:        isAppReady,
@@ -67,6 +71,7 @@ func (s *Server) Run(
 		dgrpcserver.WithGRPCServerOptions(grpc.MaxRecvMsgSize(25 * 1024 * 1024)),
 		// TODO: Uncomment when auth is implemented
 		dgrpcserver.WithConnectInterceptor(middleware.NewAuthInterceptor(s.authenticator, s.logger)),
+		dgrpcserver.WithConnectInterceptor(middleware.NewCreditsInterceptor(s.creditsService, s.logger)),
 		dgrpcserver.WithConnectInterceptor(connectrpc.NewErrorsInterceptor(s.logger, connectrpc.WithErrorMapper(func(err error) error {
 			if errors.Is(err, datastore.NotFound) {
 				return errorx.ToConnect(errorx.New(errorx.CodeNotFound, "DATASTORE_NOT_FOUND", err.Error(), err))

@@ -84,17 +84,10 @@ func NewCodeGeneratorAgent(
 	}
 }
 
-func (l *codeGenerator) setTags(ctx context.Context) context.Context {
-	ctx = context.WithValue(ctx, llm.VideoIDKey, l.videoID)
-	ctx = context.WithValue(ctx, llm.SceneIDKey, l.slideID)
-	return ctx
-}
-
 func (l *codeGenerator) ContinueAgent(
 	ctx context.Context,
 	options ContinueSessionOptions,
 ) (*common.RunResult, error) {
-	ctx = l.setTags(ctx)
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
 		return nil, agenterrors.InvalidInput("user response is required", nil)
@@ -220,7 +213,6 @@ func (l *codeGenerator) GenerateCode(
 	slide *pbcore.Slide,
 	input *pbportal.CreateVideoRequest,
 ) (*common.RunResult, error) {
-	ctx = l.setTags(ctx)
 	if err := ValidatePrompt(input.Prompt); err != nil {
 		return nil, err
 	}
@@ -319,7 +311,7 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 
-		llmResponse, llmThinking, err := l.llmService.GenerateAnimation(ctx, generatePlanRequest, history, func(chunk string) {
+		llmResponse, err := l.llmService.GenerateAnimation(ctx, generatePlanRequest, history, func(chunk string) {
 			l.state.Publish(common.AgentState{
 				Thinking: chunk,
 				State:    common.StateStatusProcessing,
@@ -330,7 +322,11 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
 		}
 
-		result, err = l.toolRegistry.HandleAnimationGeneration(ctx, session, llmResponse, llmThinking, l.assetRegistry)
+		if llmResponse == nil {
+			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", errors.New("LLM response is nil"))
+		}
+
+		result, err = l.toolRegistry.HandleAnimationGeneration(ctx, session, *llmResponse, l.assetRegistry)
 		if err != nil {
 			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
 		}
@@ -339,7 +335,7 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			return result, nil
 		}
 
-		codeResponse := llmResponse.AsGenerateAnimationCodeResponse()
+		codeResponse := llmResponse.Response.AsGenerateAnimationCodeResponse()
 
 		buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, code_builder.ValidateAndBuildInput{
 			Animation:          codeResponse,
@@ -367,10 +363,10 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 		}
 
 		// Save the code in history, we may avoid saving the thinking summary if the animation is generated
-		if llmThinking != nil && *llmThinking != "" {
+		if llmResponse.Summary != nil && *llmResponse.Summary != "" {
 			session.AddMessage(&pbcore.ConversationMessage{
 				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-				Message: *llmThinking,
+				Message: *llmResponse.Summary,
 				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING,
 				AiModel: &aiModel,
 			})

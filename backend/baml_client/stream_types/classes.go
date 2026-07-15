@@ -521,9 +521,8 @@ func (c GenerateScriptPlan) BamlTypeName() string {
 }
 
 type GeneratedVideoPlan struct {
-	VideoName       *string        `json:"videoName"`
-	Sections        []SceneSection `json:"sections"`
-	ThinkingSummary *string        `json:"thinkingSummary"`
+	VideoName *string        `json:"videoName"`
+	Sections  []SceneSection `json:"sections"`
 }
 
 func (c *GeneratedVideoPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -546,9 +545,6 @@ func (c *GeneratedVideoPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.Ty
 		case "sections":
 			c.Sections = baml.Decode(valueHolder).Interface().([]SceneSection)
 
-		case "thinkingSummary":
-			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class GeneratedVideoPlan", key))
@@ -564,8 +560,6 @@ func (c GeneratedVideoPlan) Encode() (*cffi.HostValue, error) {
 	fields["videoName"] = c.VideoName
 
 	fields["sections"] = c.Sections
-
-	fields["thinkingSummary"] = c.ThinkingSummary
 
 	return baml.EncodeClass("GeneratedVideoPlan", fields, nil)
 }

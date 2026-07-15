@@ -19,9 +19,11 @@ func (p *Portal) GenerateSuggestions(ctx context.Context, c *connect.Request[pbp
 	}
 
 	videoID := strings.TrimSpace(c.Msg.VideoId)
-	if videoID == "" || c.Msg.Slide == nil {
+	if videoID == "" || c.Msg.Slide == nil || c.Msg.Slide.Id == "" {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("video and slide is required"))
 	}
+
+	ctx = p.setContext(ctx, actor.OrganizationID, videoID, c.Msg.Slide.Id)
 
 	logger := logging.Logger(ctx, p.logger).With(
 		zap.String("session_id", videoID),
@@ -32,7 +34,7 @@ func (p *Portal) GenerateSuggestions(ctx context.Context, c *connect.Request[pbp
 	// TODO: Remove it later
 	c.Msg.PageSize = 4
 
-	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, p.templateService, logger)
+	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, p.templateService, p.llmService, logger)
 	suggestions, err := suggester.GenerateSuggestions(ctx, c.Msg)
 	if err != nil {
 		logger.Error("failed to generate suggestions", zap.Error(err))
@@ -67,7 +69,9 @@ func (p *Portal) RenderSuggestion(ctx context.Context, c *connect.Request[pbport
 		return connect.NewResponse(&pbportal.SuggestScenesResponse{}), nil
 	}
 
-	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, p.templateService, logger)
+	ctx = p.setContext(ctx, actor.OrganizationID, videoID, c.Msg.Slide.Id)
+
+	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, p.templateService, p.llmService, logger)
 	suggestions, err := suggester.RenderSuggestion(ctx, c.Msg.Tid, c.Msg.Slide, video)
 	if err != nil {
 		return nil, err

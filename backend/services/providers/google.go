@@ -7,6 +7,7 @@ import (
 	"fmt"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
+	creditsvc "github.com/shank318/coasterai/services/credits"
 	"go.uber.org/zap"
 	"google.golang.org/genai"
 	"path/filepath"
@@ -20,16 +21,17 @@ type LLMProvider interface {
 }
 
 type ProviderGoogle struct {
-	client       *genai.Client
-	logger       *zap.Logger
-	mediaService services.MediaStore
+	client         *genai.Client
+	logger         *zap.Logger
+	mediaService   services.MediaStore
+	creditsService creditsvc.Service
 }
 
 func (p ProviderGoogle) GetName() string {
 	return "google"
 }
 
-func NewProviderGoogle(apiKey string, mediaService services.MediaStore, logger *zap.Logger) LLMProvider {
+func NewProviderGoogle(apiKey string, mediaService services.MediaStore, creditService creditsvc.Service, logger *zap.Logger) LLMProvider {
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
 		APIKey:  apiKey,
 		Backend: genai.BackendGeminiAPI,
@@ -40,7 +42,7 @@ func NewProviderGoogle(apiKey string, mediaService services.MediaStore, logger *
 		panic(err)
 	}
 
-	return &ProviderGoogle{client: client, mediaService: mediaService, logger: logger.Named("google_provider")}
+	return &ProviderGoogle{client: client, mediaService: mediaService, logger: logger.Named("google_provider"), creditsService: creditService}
 }
 
 type VoiceOverParams struct {
@@ -49,6 +51,8 @@ type VoiceOverParams struct {
 	OrgID    string
 	FileName string
 }
+
+const modelName = "gemini-3.1-flash-tts-preview"
 
 func (p ProviderGoogle) GenerateVoiceOver(ctx context.Context, params VoiceOverParams) (*pbcore.MediaAsset, error) {
 	if strings.TrimSpace(params.Text) == "" {
@@ -79,7 +83,6 @@ func (p ProviderGoogle) GenerateVoiceOver(ctx context.Context, params VoiceOverP
 	}
 
 	// 2. Dispatch the content generation request to the native TTS model
-	modelName := "gemini-3.1-flash-tts-preview"
 	resp, err := p.client.Models.GenerateContent(ctx, modelName, genai.Text(params.Text), config)
 	if err != nil {
 		p.logger.Error("failed to generate voice content via Gemini API", zap.Error(err))
@@ -99,6 +102,10 @@ func (p ProviderGoogle) GenerateVoiceOver(ctx context.Context, params VoiceOverP
 	if len(rawPcmData) == 0 {
 		return nil, errors.New("no audio inline data found in the response chunk")
 	}
+
+	defer func() {
+		p.chargeUsage(ctx, resp.UsageMetadata)
+	}()
 
 	// Upload to media store
 	wavBytes, err := services.EncodePCMToWAV(rawPcmData, 24000, 1, 16)
@@ -120,4 +127,42 @@ func (p ProviderGoogle) GenerateVoiceOver(ctx context.Context, params VoiceOverP
 	}
 
 	return asset, nil
+}
+
+func (l *ProviderGoogle) chargeUsage(ctx context.Context, usageMeta *genai.GenerateContentResponseUsageMetadata) {
+	if usageMeta == nil {
+		l.logger.Warn("usage metadata is nil")
+		return
+	}
+
+	input := creditsvc.ChargeCreditsInput{
+		Provider: l.GetName(),
+		Model:    modelName,
+		Usage:    processTokenUsage(usageMeta),
+		Action:   creditsvc.ActionVoiceGeneration,
+	}
+
+	if _, err := l.creditsService.ChargeCredits(ctx, input); err != nil {
+		l.logger.Error("failed to charge credits", zap.Error(err), zap.Any("usage", input))
+	}
+}
+
+func processTokenUsage(meta *genai.GenerateContentResponseUsageMetadata) creditsvc.Usage {
+
+	// 1. Input/Prompt Tokens (Includes cached tokens)
+	inputTokens := meta.PromptTokenCount
+
+	// 2. Cached Input Tokens (Tokens pulled from pre-existing context cache)
+	cachedTokens := meta.CachedContentTokenCount
+
+	// 3. True Billed Input Tokens (The remaining newly processed input tokens)
+	billedInputTokens := inputTokens - cachedTokens
+
+	// 4. Output/Generation Tokens
+	outputTokens := meta.CandidatesTokenCount
+
+	// 5. Reasoning/Thought Tokens (For models like Gemini 2.0 Flash Thinking / Gemini 2.5 Pro)
+	//thoughtTokens := meta.ThoughtsTokenCount
+
+	return creditsvc.NewUsage(int64(billedInputTokens), int64(outputTokens), int64(cachedTokens))
 }

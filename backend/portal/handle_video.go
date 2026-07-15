@@ -57,6 +57,7 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 	}
 	videoID = video.ID
 
+	ctx = p.setContext(ctx, actor.OrganizationID, videoID, "")
 	logger := logging.Logger(ctx, p.logger).With(zap.String("session_id", videoID))
 
 	if err := stream.Send(&pbportal.CreateVideoResponse{
@@ -113,6 +114,8 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 		return errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "USER_RESPONSE_REQUIRED", "response is required", nil))
 	}
 
+	ctx = p.setContext(ctx, actor.OrganizationID, videoID, "")
+
 	statePublisher := common.CreatePersistedAgentStatusPublisher(videoID, p.authStateStore, logger)
 	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID, statePublisher)
 
@@ -157,7 +160,8 @@ func (p *Portal) streamAgentRun(
 	run func(ctx context.Context) (*common.RunResult, error), // run MUST accept ctx
 	logger *zap.Logger,
 ) (err error) {
-	runCtx, cancelRun := context.WithCancel(context.Background())
+	runCtx := context.WithoutCancel(ctx)
+	runCtx, cancelRun := context.WithCancel(runCtx)
 	defer cancelRun()
 
 	type runOutput struct {

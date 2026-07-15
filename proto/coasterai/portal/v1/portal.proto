@@ -17,6 +17,7 @@ import "coasterai/core/v1/chat.proto";
 import "coasterai/portal/v1/templates.proto";
 import "coasterai/portal/v1/voiceover.proto";
 import "coasterai/core/v1/audio.proto";
+import "coasterai/core/v1/credits.proto";
 
 service PortalService {
   rpc GetConfig(.google.protobuf.Empty) returns (Config);
@@ -75,6 +76,9 @@ service PortalService {
 
   // Voiceover
   rpc GenerateVoiceover(GenerateVoiceoverRequest) returns (core.v1.Voiceover);
+
+  // Credits
+  rpc GetCredits(core.v1.GetCreditsRequest) returns (core.v1.GetCreditsResponse);
 }
 
 message GetMediaAssetsByIDs {

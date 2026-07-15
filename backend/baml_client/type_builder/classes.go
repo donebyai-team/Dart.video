@@ -411,10 +411,6 @@ func (t *GeneratedVideoPlanClassView) PropertySections() (ClassPropertyView, err
 	return t.inner.Property("sections")
 }
 
-func (t *GeneratedVideoPlanClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
-	return t.inner.Property("thinkingSummary")
-}
-
 func (t *TypeBuilder) GeneratedVideoPlan() (*GeneratedVideoPlanClassView, error) {
 	bld, err := t.inner.Class("GeneratedVideoPlan")
 	if err != nil {

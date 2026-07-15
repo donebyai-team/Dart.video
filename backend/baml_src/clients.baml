@@ -10,15 +10,6 @@ client<llm> CustomGeminiProPreview {
   }
 }
 
-client<llm> CustomGemini3Flash {
-  provider google-ai
-  retry_policy Exponential
-  options {
-    model "gemini-3.5-flash"
-    api_key env.GOOGLE_API_KEY
-  }
-}
-
 client<llm> SmallBoyFastGemini {
   provider google-ai
   retry_policy Exponential
@@ -34,54 +25,6 @@ client<llm> SmallBoyFastGPT {
   options {
     model "gpt-4o-mini"
     api_key env.OPENAI_API_KEY
-  }
-}
-
-client<llm> CustomClaudeOpus {
-  provider "anthropic"
-  retry_policy Exponential
-  options {
-    model "claude-opus-4-6"
-    api_key env.ANTHROPIC_API_KEY
-    max_tokens 12000
-    temperature 0.1
-  }
-}
-
-client<llm> CustomOpenAI {
-  provider "openai-responses"
-  retry_policy Exponential
-  options {
-    model "gpt-5.4"
-    api_key env.OPENAI_API_KEY
-    //max_completion_tokens 12000
-  }
-}
-
-client<llm> CustomOpenAI5 {
-  provider "openai-responses"
-  retry_policy Exponential
-  options {
-    model "gpt-5.4"
-    api_key env.OPENAI_API_KEY
-    //max_completion_tokens 12000
-    reasoning {
-      effort "medium"
-    }
-  }
-}
-
-client<llm> CustomOpenAI5WithThinkingSummary {
-  provider "openai-responses"
-  retry_policy Exponential
-  options {
-    model "gpt-5.4"
-    api_key env.OPENAI_API_KEY
-    //max_completion_tokens 12000
-    reasoning {
-      effort "medium"
-      summary "auto"
-    }
   }
 }
 
@@ -108,20 +51,6 @@ client<llm> CustomOpenAI55WithThinkingSummary {
     //max_completion_tokens 12000
     reasoning {
       effort "medium"
-      summary "auto"
-    }
-  }
-}
-
-client<llm> CustomOpenAI5WithLowThinkingSummary {
-  provider "openai-responses"
-  retry_policy Exponential
-  options {
-    model "gpt-5.4"
-    api_key env.OPENAI_API_KEY
-    //max_completion_tokens 12000
-    reasoning {
-      effort "low"
       summary "auto"
     }
   }

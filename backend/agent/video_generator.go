@@ -100,14 +100,9 @@ func NewAgentV2(
 	}
 }
 
-func (a *agentV2) setTags(ctx context.Context) context.Context {
-	return context.WithValue(ctx, llm.VideoIDKey, a.session.GetID())
-}
-
 const SCRIPT_CONFORMATION_RESPONSE = "SCRIPT_APPROVED"
 
 func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) (*common.RunResult, error) {
-	ctx = a.setTags(ctx)
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
 		return nil, agenterrors.InvalidInput("user response is required", nil)
@@ -182,7 +177,6 @@ func (a *agentV2) StopAgent(ctx context.Context) error {
 }
 
 func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*common.RunResult, error) {
-	ctx = a.setTags(ctx)
 	if err := a.validateStartOptions(options); err != nil {
 		return nil, err
 	}
@@ -265,11 +259,14 @@ func (a *agentV2) injectMediaAssets(ctx context.Context, input *pbportal.CreateV
 			if err != nil {
 				return err
 			}
-			mediaAsset.Description = imageAnalysis.Description
-			mediaAsset.Tags = strings.Join(imageAnalysis.Tags, ",")
-			note, ok := userNoteMap[mediaAsset.ID]
-			if ok {
-				mediaAsset.UserNote = note
+
+			if imageAnalysis != nil {
+				mediaAsset.Description = imageAnalysis.Response.Description
+				mediaAsset.Tags = strings.Join(imageAnalysis.Response.Tags, ",")
+				note, ok := userNoteMap[mediaAsset.ID]
+				if ok {
+					mediaAsset.UserNote = note
+				}
 			}
 		}
 
@@ -299,7 +296,7 @@ func (a *agentV2) runPlanningScript(
 			return nil, err
 		}
 
-		llmResponse, llmThinking, err := a.llmService.GenerateScript(
+		llmResponse, err := a.llmService.GenerateScript(
 			ctx,
 			req,
 			history,
@@ -311,11 +308,14 @@ func (a *agentV2) runPlanningScript(
 			return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
 		}
 
+		if llmResponse == nil {
+			return nil, agenterrors.Internal("llm response did not include a plan", nil)
+		}
+
 		result, err := a.toolRegistry.HandleScriptPlanner(
 			ctx,
 			session,
-			llmResponse,
-			llmThinking,
+			*llmResponse,
 			a.assetRegistry,
 		)
 		if err != nil {
@@ -382,7 +382,7 @@ func (a *agentV2) generateScenes(
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		a.publishProcessingState("Generating scenes...")
-		llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, nil, func(chunk string) {
+		llmResponse, err := a.llmService.GenerateVideoScenes(ctx, req, nil, func(chunk string) {
 			a.publishProcessingState(chunk)
 		})
 		if err != nil {
@@ -499,7 +499,7 @@ func (a *agentV2) publishProcessingState(thinking string) {
 	})
 }
 
-func (a *agentV2) runApplyPlanAsync(ctx context.Context, plan *types.GeneratedVideoPlan) (*common.RunResult, error) {
+func (a *agentV2) runApplyPlanAsync(ctx context.Context, plan *common.LLMResponse[types.GeneratedVideoPlan]) (*common.RunResult, error) {
 	// We wait for the first slide to be generated as its a part of the planning phase
 	// once first slide is generated, we let the applyPlan run async which can be cancelled via StopAgent
 	firstSlideReady := make(chan struct{}, 1)
@@ -541,12 +541,12 @@ func (a *agentV2) runApplyPlanAsync(ctx context.Context, plan *types.GeneratedVi
 // apply should always work on frames
 func (a *agentV2) applyPlan(
 	ctx context.Context,
-	aiPlan *types.GeneratedVideoPlan,
+	aiPlan *common.LLMResponse[types.GeneratedVideoPlan],
 	firstSlideReady chan<- struct{},
 ) (err error) {
 	// save config with pending items
 	builder := NewVideoConfigGenerator(a.logger, a.videoService).
-		Init(a.session.GetID(), aiPlan.VideoName)
+		Init(a.session.GetID(), aiPlan.Response.VideoName)
 	_, err = builder.CreatePendingSlidesV2(ctx, a.templateRegistry, aiPlan)
 	if err != nil {
 		return fmt.Errorf("creating pending slides: %w", err)

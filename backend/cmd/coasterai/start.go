@@ -8,6 +8,7 @@ import (
 	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/code_builder"
+	"github.com/shank318/coasterai/services/credits"
 	servicesllm "github.com/shank318/coasterai/services/llm"
 	"github.com/shank318/coasterai/services/providers"
 	"github.com/shank318/coasterai/services/templates"
@@ -182,7 +183,8 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		GoogleAuth0CallbackUrl: sflags.MustGetString(cmd, "portal-reddit-redirect-url"),
 	}
 
-	authUsecase, err := services.NewAuthUsecase(cmd.Context(), authConfig, deps.DataStore, deps.AuthSigningKeyGetter, zlog)
+	creditService := credits.NewService(deps.DataStore, zlog)
+	authUsecase, err := services.NewAuthUsecase(cmd.Context(), authConfig, deps.DataStore, deps.AuthSigningKeyGetter, creditService, zlog)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create auth usecase: %w", err)
 	}
@@ -193,7 +195,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		return nil, errors.Wrap(err, "unable to create render video service")
 	}
 
-	googleProvider := providers.NewProviderGoogle(sflags.MustGetString(cmd, "common-google-api-key"), deps.MediaStore, zlog)
+	googleProvider := providers.NewProviderGoogle(sflags.MustGetString(cmd, "common-google-api-key"), deps.MediaStore, creditService, zlog)
 	fireCrawlClient := providers.NewFireCrawlClient(sflags.MustGetString(cmd, "common-firecrawl-api-key"))
 
 	p := portal.New(
@@ -209,7 +211,8 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		brand_identity.NewBrandIdentityService(zlog, deps.DataStore, deps.MediaStore, fireCrawlClient),
 		code_builder.NewCodeBuilderService(deps.MediaStore, zlog),
 		audio.NewAudioService(googleProvider, zlog),
-		llm.NewLlmService(zlog, cacheStore),
+		llm.NewLlmService(zlog, cacheStore, creditService),
+		creditService,
 		templates.NewService(
 			deps.DataStore,
 			servicesllm.NewOpenAIService(

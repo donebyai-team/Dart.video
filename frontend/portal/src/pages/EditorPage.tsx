@@ -19,6 +19,7 @@ import { ActiveToolType } from '@/types/tools';
 import { createSlideEntityId, createOverlayEntityId } from '@/types/selection';
 import Link from 'next/link';
 import BackgroundMusicSelector from '@/components/editor/toolbar/BackgroundMusicSelector';
+import CreditUsage from '@/components/editor/toolbar/CreditUsage';
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext';
 import { pollVideoRender } from '@/services/utils';
 import VideoGenerationProgress from '@/components/editor/VideoGenerationProgress';
@@ -428,7 +429,8 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             {/* To fixed is used here to show only 2 decimal point to user for UX */}
             {convertFramesToSeconds(videoConfigFromStore?.metadata?.durationInFrames!, fps()).toFixed(2)}s            
           </div>
-          <ResolutionSelector />
+          <CreditUsage videoId={decodedVideoId} />
+          {/* <ResolutionSelector /> */}
           <BackgroundMusicSelector />
           {isTemplateVideo && (
             <Button

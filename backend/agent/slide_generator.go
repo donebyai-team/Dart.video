@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
@@ -94,9 +95,10 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 func (g *videoConfigGenerator) CreatePendingSlidesV2(
 	ctx context.Context,
 	templateRegistry *TemplateRegistry,
-	plan *types.GeneratedVideoPlan,
+	llmResponse *common.LLMResponse[types.GeneratedVideoPlan],
 ) (*pbcore.Video, error) {
 	g.AddBranding(templateRegistry.GetAssetRegistry())
+	plan := llmResponse.Response
 
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))
 	sceneMapper := make(map[string]*scenes.SceneConfig)
@@ -160,7 +162,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 		zap.Int("total_slides", len(sceneMapper)))
 
 	g.video.Config.Sections = sections
-	g.video.Metadata.ThinkingSummary = plan.ThinkingSummary
+	g.video.Metadata.ThinkingSummary = llmResponse.Summary
 
 	if err := g.update(ctx, models.VideoStatusPROCESSING); err != nil {
 		return nil, err

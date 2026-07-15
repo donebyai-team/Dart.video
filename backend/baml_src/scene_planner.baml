@@ -20,7 +20,6 @@ class SceneSection {
 class GeneratedVideoPlan {
     videoName string @description("name of the video, around 5 to 15 length")
     sections SceneSection[]
-    thinkingSummary string? @skip()
 }
 
 function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> GeneratedVideoPlan {

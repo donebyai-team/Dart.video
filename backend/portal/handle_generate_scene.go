@@ -35,6 +35,8 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 		return connect.NewError(connect.CodeInvalidArgument, errors.New("slide_to_edit is required"))
 	}
 
+	ctx = p.setContext(ctx, actor.OrganizationID, videoID, slideToEdit.Id)
+
 	logger := logging.Logger(ctx, p.logger).With(
 		zap.String("session_id", videoID),
 		zap.String("organization_id", actor.OrganizationID),
@@ -98,7 +100,8 @@ func (p *Portal) streamAnimationGenerationRun(
 		err    error
 	}
 
-	runCtx, cancelRun := context.WithCancel(context.Background())
+	runCtx := context.WithoutCancel(ctx)
+	runCtx, cancelRun := context.WithCancel(runCtx)
 	defer cancelRun()
 
 	done := make(chan runOutput, 1)

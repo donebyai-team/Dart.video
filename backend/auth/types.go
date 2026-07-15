@@ -8,6 +8,14 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 )
 
+type contextKey string
+
+const (
+	VideoIDKey contextKey = "video_id"
+	OrgIDKey   contextKey = "org_id"
+	SceneIDKey contextKey = "scene_id"
+)
+
 // Credentials jwt credentials object
 type Credentials struct {
 	jwt.StandardClaims
