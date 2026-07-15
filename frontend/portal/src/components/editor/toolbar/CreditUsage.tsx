@@ -36,7 +36,7 @@ const CreditUsage = ({ videoId }: CreditUsageProps) => {
         return () => {
             isActive = false;
         };
-    }, [portalClient, videoId, videoConfig]);
+    }, [portalClient, videoId, videoConfig?.version]);
 
     return (
         <div className="flex items-center gap-2 rounded-lg border bg-muted/40 px-2.5 py-1.5 text-xs">

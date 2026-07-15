@@ -45,7 +45,9 @@ const DefaultVideoFPS = 30
 
 func isMetadataChanged(existing *pbcore.VideoMetadata, new *pbcore.VideoMetadata) bool {
 	backgroundChanged := proto.Equal(existing.BackgroundStyle, new.BackgroundStyle)
-	return !backgroundChanged
+	audioChanged := proto.Equal(existing.BgAudio, new.BgAudio)
+	videoBranding := proto.Equal(existing.GeneratedBranding, new.GeneratedBranding)
+	return !backgroundChanged || !audioChanged || !videoBranding
 }
 
 func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Video) (*models.Video, error) {
