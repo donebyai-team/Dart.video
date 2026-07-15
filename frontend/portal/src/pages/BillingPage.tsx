@@ -83,8 +83,8 @@ const BillingPage = () => {
                             <div className="overflow-hidden rounded-2xl border bg-background">
                                 <div className="grid grid-cols-[1.2fr_1fr_auto] gap-4 border-b bg-muted/40 px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                                     <span>Date</span>
-                                    <span>Action</span>
-                                    <span className="text-right">Amount</span>
+                                    <span>Type</span>
+                                    <span className="text-right">Credits</span>
                                 </div>
                                 <div className="divide-y">
                                     {creditHistory.map((entry) => (

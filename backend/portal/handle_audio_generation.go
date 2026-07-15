@@ -27,6 +27,8 @@ func (p *Portal) GenerateVoiceover(ctx context.Context, c *connect.Request[pbpor
 		zap.String("slideId", c.Msg.SlideId),
 	)
 
+	ctx = p.setContext(ctx, actor.OrganizationID, videoID, c.Msg.SlideId)
+
 	voiceover, err := p.audioGenerationProvider.GenerateVoiceover(ctx, providers.VoiceOverParams{
 		Text:    c.Msg.Text,
 		VoiceID: c.Msg.VoiceId,

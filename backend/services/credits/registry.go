@@ -44,19 +44,26 @@ var providerPricingRegistry = map[string]Pricing{
 		OutputCostPer1MTokens: 30,
 		CachedCostPer1MTokens: 0.50,
 	},
-	pricingKey("google-ai", "gemini-3.1-pro-preview"): {
-		Provider:              "google-ai",
+	pricingKey("google", "gemini-3.1-pro-preview"): {
+		Provider:              "google",
 		Model:                 "gemini-3.1-pro-preview",
 		InputCostPer1MTokens:  2.0,
 		OutputCostPer1MTokens: 12.0,
 		CachedCostPer1MTokens: 0.20,
 	},
-	pricingKey("google-ai", "gemini-2.5-flash-lite"): {
-		Provider:              "google-ai",
+	pricingKey("google", "gemini-2.5-flash-lite"): {
+		Provider:              "google",
 		Model:                 "gemini-2.5-flash-lite",
 		InputCostPer1MTokens:  0.10,
 		OutputCostPer1MTokens: 0.40,
 		CachedCostPer1MTokens: 0.01,
+	},
+	pricingKey("google", "gemini-3.1-flash-tts-preview"): {
+		Provider:              "google",
+		Model:                 "gemini-3.1-flash-tts-preview",
+		InputCostPer1MTokens:  1.0,
+		OutputCostPer1MTokens: 20.0,
+		CachedCostPer1MTokens: 0.00,
 	},
 }
 
@@ -104,6 +111,10 @@ func pricingKey(provider, model string) string {
 
 	if provider == "openai-responses" {
 		provider = "openai"
+	}
+	
+	if provider == "google-ai" {
+		provider = "google"
 	}
 
 	return provider + "::" + model

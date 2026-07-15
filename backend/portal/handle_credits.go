@@ -4,6 +4,7 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/services/templates"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -13,7 +14,13 @@ func (p *Portal) GetCredits(ctx context.Context, c *connect.Request[pbcore.GetCr
 		return nil, err
 	}
 
-	available, err := p.creditsService.GetAvailableCredits(ctx, actor.OrganizationID, c.Msg.ReferenceID)
+	referenceID := c.Msg.ReferenceID
+	if referenceID != nil {
+		resourceID, _ := templates.ParseResourceID(*referenceID)
+		referenceID = &resourceID
+	}
+
+	available, err := p.creditsService.GetAvailableCredits(ctx, actor.OrganizationID, referenceID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

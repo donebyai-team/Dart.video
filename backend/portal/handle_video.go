@@ -160,7 +160,8 @@ func (p *Portal) streamAgentRun(
 	run func(ctx context.Context) (*common.RunResult, error), // run MUST accept ctx
 	logger *zap.Logger,
 ) (err error) {
-	runCtx, cancelRun := context.WithCancel(context.Background())
+	runCtx := context.WithoutCancel(ctx)
+	runCtx, cancelRun := context.WithCancel(runCtx)
 	defer cancelRun()
 
 	type runOutput struct {

@@ -100,7 +100,8 @@ func (p *Portal) streamAnimationGenerationRun(
 		err    error
 	}
 
-	runCtx, cancelRun := context.WithCancel(context.Background())
+	runCtx := context.WithoutCancel(ctx)
+	runCtx, cancelRun := context.WithCancel(runCtx)
 	defer cancelRun()
 
 	done := make(chan runOutput, 1)

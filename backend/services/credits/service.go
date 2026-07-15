@@ -32,8 +32,9 @@ func (s *service) ChargeCredits(ctx context.Context, input ChargeCreditsInput) (
 
 	usage, err := creditLedgerUsage(input.Usage)
 	if err != nil {
-		return nil, fmt.Errorf("credit ledger usage: %w", err)
+		s.logger.Error("error while calculating creditLedgerUsage, continuing..", zap.Error(err))
 	}
+
 	originalAmount := creditsFromUsage(usage, pricing)
 	cfg := getActionConfig(input.Action)
 	chargedAmount := originalAmount * cfg.Multiplier
@@ -104,24 +105,30 @@ func creditLedgerUsage(usage Usage) (models.CreditLedgerUsage, error) {
 		return models.CreditLedgerUsage{}, nil
 	}
 
-	inputTokens, err := usage.InputTokens()
-	if err != nil {
-		return models.CreditLedgerUsage{}, fmt.Errorf("input tokens: %w", err)
-	}
-	outputTokens, err := usage.OutputTokens()
-	if err != nil {
-		return models.CreditLedgerUsage{}, fmt.Errorf("output tokens: %w", err)
-	}
-	cachedInputTokens, err := usage.CachedInputTokens()
-	if err != nil {
-		return models.CreditLedgerUsage{}, fmt.Errorf("cached input tokens: %w", err)
+	var (
+		result models.CreditLedgerUsage
+		err    error
+	)
+
+	if tokens, e := usage.InputTokens(); e != nil {
+		err = fmt.Errorf("input tokens: %w", e)
+	} else {
+		result.InputTokens = tokens
 	}
 
-	return models.CreditLedgerUsage{
-		InputTokens:       inputTokens,
-		OutputTokens:      outputTokens,
-		CachedInputTokens: cachedInputTokens,
-	}, nil
+	if tokens, e := usage.OutputTokens(); e != nil && err == nil {
+		err = fmt.Errorf("output tokens: %w", e)
+	} else if e == nil {
+		result.OutputTokens = tokens
+	}
+
+	if tokens, e := usage.CachedInputTokens(); e != nil && err == nil {
+		err = fmt.Errorf("cached input tokens: %w", e)
+	} else if e == nil {
+		result.CachedInputTokens = tokens
+	}
+
+	return result, err
 }
 
 func creditsFromUsage(usage models.CreditLedgerUsage, pricing Pricing) int {
