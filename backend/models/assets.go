@@ -2,7 +2,14 @@ package models
 
 import (
 	"database/sql/driver"
+	"encoding/base64"
+	"fmt"
+	"github.com/shank318/coasterai/baml_client"
+	"github.com/shank318/coasterai/baml_client/types"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/utils"
+	"io"
+	"net/http"
 	"time"
 )
 
@@ -25,6 +32,27 @@ type MediaAsset struct {
 	UserNote    string `db:"-"`
 	Description string `db:"-"`
 	Tags        string `db:"-"`
+}
+
+func (a MediaAsset) ToImage() (types.Image, error) {
+	resp, err := http.Get(a.Path)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch image: %s", resp.Status)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	toString := base64.StdEncoding.EncodeToString(data)
+
+	return baml_client.NewImageFromBase64(toString, utils.Ptr(a.MimeType))
 }
 
 func (asset MediaAsset) ToProto() *pbcore.MediaAsset {

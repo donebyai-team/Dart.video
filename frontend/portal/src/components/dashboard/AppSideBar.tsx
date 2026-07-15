@@ -8,19 +8,6 @@ import {
     Wand2,
     CreditCard,
 } from "lucide-react";
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    useSidebar,
-} from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@coasterai/ui-core/hooks/useAuth";
@@ -74,8 +61,8 @@ export function AppSidebar() {
 
 
     return (
-        <Sidebar>
-            <SidebarHeader className="p-4 border-b border-border">
+        <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-border bg-background">
+            <div className="border-b border-border p-4">
                 <div className="flex items-center gap-2">
                     <Link href="/dashboard" className="flex items-center gap-2 px-2">
                         <span className="text-lg font-semibold text-gray-900">
@@ -96,29 +83,27 @@ export function AppSidebar() {
     )}
   </Button> */}
                 </div>
-            </SidebarHeader>
-            <SidebarContent className="flex-grow">
-                <SidebarGroup>
-                    <SidebarGroupLabel>Main</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
+            </div>
+            <div className="flex flex-1 flex-col overflow-y-auto">
+                <div className="px-3 py-3">                    
+                    <nav className="space-y-0">
                             {mainMenuItems.map((item) => (
-                                <SidebarMenuItem key={item.path}>
-                                    <SidebarMenuButton asChild isActive={item.active}>
-                                        <Link href={item.path} className="flex items-center">
+                                <div key={item.path}>
+                                        <Link
+                                            href={item.path}
+                                            className={`flex items-center rounded-md px-3 py-2 text-sm transition-colors ${item.active ? "bg-secondary font-medium text-foreground" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"}`}
+                                        >
                                             <item.icon className="h-4 w-4 mr-2" />
                                             <span>{item.title}</span>
                                         </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
+                                </div>
                             ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-            </SidebarContent>
+                    </nav>
+                </div>
+            </div>
 
             {/* ---------------- Footer ---------------- */}
-            <SidebarFooter className="p-4 border-t border-border">
+            <div className="border-t border-border p-4">
                 <WorkspaceSwitcher />
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
@@ -133,7 +118,7 @@ export function AppSidebar() {
                         </p>
                     </div>
                 </div>
-            </SidebarFooter>
-        </Sidebar>
+            </div>
+        </aside>
     );
 }

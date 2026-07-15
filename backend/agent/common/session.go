@@ -358,7 +358,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 
 			for _, mediaAsset := range mediaAssets {
 				if mediaAsset.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
-					img, err := baml_client.NewImageFromUrl(mediaAsset.Path, utils.Ptr(mediaAsset.MimeType))
+					img, err := mediaAsset.ToImage()
 					if err != nil {
 						return nil, lastAIModel, fmt.Errorf("failed to convert image from url: %w", err)
 					}
