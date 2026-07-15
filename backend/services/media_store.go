@@ -358,9 +358,7 @@ func GenerateCodeStoragePath(slideID, orgID string) string {
 	if slideID != "" {
 		codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, slideID)
 	}
-
-	codeFilePath = fmt.Sprintf("%s-%d", codeFilePath, time.Now().Unix())
-
+	
 	return codeFilePath
 }
 

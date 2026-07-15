@@ -130,10 +130,5 @@ export const getSlideTransitionDirectionValue = (
     return slide.direction
   }
 
-  const planDirection = (slide.plan as Record<string, unknown> | undefined)?.transition_direction
-  if (typeof planDirection === 'number') {
-    return planDirection as TransitionDirection
-  }
-
   return undefined
 }

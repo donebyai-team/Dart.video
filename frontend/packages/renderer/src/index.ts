@@ -2,7 +2,6 @@ export { backgroundStyleToCSS, patternToCSS, PATTERN_OPTIONS } from './backgroun
 export { BackgroundLayer } from './BackgroundLayer';
 export { getBackgroundEffectType, getBackgroundEffectKey, getSolidBackgroundColor, supportsAnimatedBackgroundEffect } from './backgroundEffectUtils';
 export { Slideshow, SingleSlidePreview } from './RemotionSlideshow';
-export { assignPrimitiveIds, transformAssignedPrimitiveIds } from './primitive-ast-pass';
 // Re-export types from animation for portal consumers
 export type { PatchOverlay, ElementPatchEntry } from '@coasterai/animation';
 export {

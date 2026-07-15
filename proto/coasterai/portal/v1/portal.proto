@@ -58,7 +58,7 @@ service PortalService {
   rpc GetConversationHistory(ConversationHistoryRequest) returns (GetConversationHistoryResponse);
 
   // Assets
-  rpc UpdateCode(UpdateCodeRequest) returns (core.v1.MediaAsset);
+  rpc UpdateCode(UpdateCodeRequest) returns (core.v1.CodeRegistry);
   rpc GetMediaAssets(GetMediaAssetsRequest) returns (GetMediaAssetsResponse);
   rpc GetMediaAssetsByID(GetMediaAssetsByIDs) returns (GetMediaAssetsResponse);
   rpc GenerateMusic(VideoRequestWithID) returns (GetMediaAssetsResponse);

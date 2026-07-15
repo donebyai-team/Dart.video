@@ -87,6 +87,12 @@ export const MyVideo = () => {
   const fps = videoData.metadata.fps
   const totalVideoFrames = videoData.metadata.durationInFrames
 
+  //bgm
+  const backgroundAudio = videoData?.metadata?.bgAudio;
+  const hasBackgroundAudio = Boolean(backgroundAudio?.url ?? videoData?.metadata?.backgroundAudioUrl);
+  const backgroundMusicVolume = Math.round((backgroundAudio?.volume ?? 0.8) * 100);
+  const audioVolume = hasBackgroundAudio ? backgroundMusicVolume / 100 : 0;
+
   // Get video resolution i.e width and height
   const width = videoData.metadata.resolution.width
   const height = videoData.metadata.resolution.height
@@ -147,7 +153,8 @@ export const MyVideo = () => {
           fontsReady,
           isEditing: false, // Only enable editing when NOT playing
           onSelectTemplate: undefined,
-          video: videoData
+          video: videoData,
+          audioVolume: audioVolume
         }}
       /> 
     </>

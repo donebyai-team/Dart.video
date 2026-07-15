@@ -4,9 +4,11 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"fmt"
+	"github.com/shank318/coasterai/baml_client/types"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/services/code_builder"
 )
 
 func (p *Portal) GetMediaAssets(ctx context.Context, c *connect.Request[pbportal.GetMediaAssetsRequest]) (*connect.Response[pbportal.GetMediaAssetsResponse], error) {
@@ -45,7 +47,7 @@ func (p *Portal) GetMediaAssetsByID(ctx context.Context, c *connect.Request[pbpo
 	return connect.NewResponse(&pbportal.GetMediaAssetsResponse{Assets: protoAssets}), nil
 }
 
-func (p *Portal) UpdateCode(ctx context.Context, c *connect.Request[pbportal.UpdateCodeRequest]) (*connect.Response[pbcore.MediaAsset], error) {
+func (p *Portal) UpdateCode(ctx context.Context, c *connect.Request[pbportal.UpdateCodeRequest]) (*connect.Response[pbcore.CodeRegistry], error) {
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return nil, err
@@ -55,10 +57,15 @@ func (p *Portal) UpdateCode(ctx context.Context, c *connect.Request[pbportal.Upd
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("code is required"))
 	}
 
-	asset, err := p.mediaService.UploadCode(ctx, c.Msg.Code, services.GenerateCodeStoragePath(c.Msg.SlideId, actor.OrganizationID))
+	output, err := p.codeBuilderService.ValidateAndBuild(ctx, code_builder.ValidateAndBuildInput{
+		Animation: &types.GenerateAnimationCodeResponse{
+			Code: c.Msg.Code,
+		},
+		OutputPath: services.GenerateCodeStoragePath(c.Msg.SlideId, actor.OrganizationID),
+	})
 	if err != nil {
 		return nil, err
 	}
-
-	return connect.NewResponse(asset), nil
+	
+	return connect.NewResponse(output.CodeRegistry), nil
 }

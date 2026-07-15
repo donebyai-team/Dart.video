@@ -3538,7 +3538,7 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x1eINTEGRATION_STATE_AUTH_REVOKED\x10\x02\x12'\n" +
 	"#INTEGRATION_STATE_ACCOUNT_SUSPENDED\x10\x03\x12\"\n" +
 	"\x1eINTEGRATION_STATE_AUTH_EXPIRED\x10\x04\x12%\n" +
-	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\x9d\x1e\n" +
+	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\x9f\x1e\n" +
 	"\rPortalService\x12@\n" +
 	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x1b.coasterai.portal.v1.Config\x129\n" +
 	"\x04Self\x12\x16.google.protobuf.Empty\x1a\x19.coasterai.portal.v1.User\x12_\n" +
@@ -3566,9 +3566,9 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x12GetBrandIdentities\x12\x16.google.protobuf.Empty\x1a*.coasterai.portal.v1.BrandIdentityResponse\x12^\n" +
 	"\x13UpdateBrandIdentity\x12/.coasterai.portal.v1.UpdateBrandIdentityRequest\x1a\x16.google.protobuf.Empty\x12z\n" +
 	"\x13GenerateOrEditScene\x12/.coasterai.portal.v1.GenerateOrEditSceneRequest\x1a0.coasterai.portal.v1.GenerateOrEditSceneResponse0\x01\x12~\n" +
-	"\x16GetConversationHistory\x12/.coasterai.portal.v1.ConversationHistoryRequest\x1a3.coasterai.portal.v1.GetConversationHistoryResponse\x12S\n" +
+	"\x16GetConversationHistory\x12/.coasterai.portal.v1.ConversationHistoryRequest\x1a3.coasterai.portal.v1.GetConversationHistoryResponse\x12U\n" +
 	"\n" +
-	"UpdateCode\x12&.coasterai.portal.v1.UpdateCodeRequest\x1a\x1d.coasterai.core.v1.MediaAsset\x12i\n" +
+	"UpdateCode\x12&.coasterai.portal.v1.UpdateCodeRequest\x1a\x1f.coasterai.core.v1.CodeRegistry\x12i\n" +
 	"\x0eGetMediaAssets\x12*.coasterai.portal.v1.GetMediaAssetsRequest\x1a+.coasterai.portal.v1.GetMediaAssetsResponse\x12k\n" +
 	"\x12GetMediaAssetsByID\x12(.coasterai.portal.v1.GetMediaAssetsByIDs\x1a+.coasterai.portal.v1.GetMediaAssetsResponse\x12e\n" +
 	"\rGenerateMusic\x12'.coasterai.portal.v1.VideoRequestWithID\x1a+.coasterai.portal.v1.GetMediaAssetsResponse\x12N\n" +
@@ -3681,11 +3681,12 @@ var file_coasterai_portal_v1_portal_proto_goTypes = []any{
 	(*RenderSuggestionsInput)(nil),         // 80: coasterai.portal.v1.RenderSuggestionsInput
 	(*GenerateVoiceoverRequest)(nil),       // 81: coasterai.portal.v1.GenerateVoiceoverRequest
 	(*v1.GetCreditsRequest)(nil),           // 82: coasterai.core.v1.GetCreditsRequest
-	(*v1.AnimationTemplate)(nil),           // 83: coasterai.core.v1.AnimationTemplate
-	(*GetTemplatesResponse)(nil),           // 84: coasterai.portal.v1.GetTemplatesResponse
-	(*GenerateSuggestionsResponse)(nil),    // 85: coasterai.portal.v1.GenerateSuggestionsResponse
-	(*v1.Voiceover)(nil),                   // 86: coasterai.core.v1.Voiceover
-	(*v1.GetCreditsResponse)(nil),          // 87: coasterai.core.v1.GetCreditsResponse
+	(*v1.CodeRegistry)(nil),                // 83: coasterai.core.v1.CodeRegistry
+	(*v1.AnimationTemplate)(nil),           // 84: coasterai.core.v1.AnimationTemplate
+	(*GetTemplatesResponse)(nil),           // 85: coasterai.portal.v1.GetTemplatesResponse
+	(*GenerateSuggestionsResponse)(nil),    // 86: coasterai.portal.v1.GenerateSuggestionsResponse
+	(*v1.Voiceover)(nil),                   // 87: coasterai.core.v1.Voiceover
+	(*v1.GetCreditsResponse)(nil),          // 88: coasterai.core.v1.GetCreditsResponse
 }
 var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
 	56, // 0: coasterai.portal.v1.GetMediaAssetsRequest.mediaType:type_name -> coasterai.core.v1.MediaType
@@ -3801,19 +3802,19 @@ var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
 	75, // 110: coasterai.portal.v1.PortalService.UpdateBrandIdentity:output_type -> google.protobuf.Empty
 	12, // 111: coasterai.portal.v1.PortalService.GenerateOrEditScene:output_type -> coasterai.portal.v1.GenerateOrEditSceneResponse
 	11, // 112: coasterai.portal.v1.PortalService.GetConversationHistory:output_type -> coasterai.portal.v1.GetConversationHistoryResponse
-	57, // 113: coasterai.portal.v1.PortalService.UpdateCode:output_type -> coasterai.core.v1.MediaAsset
+	83, // 113: coasterai.portal.v1.PortalService.UpdateCode:output_type -> coasterai.core.v1.CodeRegistry
 	7,  // 114: coasterai.portal.v1.PortalService.GetMediaAssets:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
 	7,  // 115: coasterai.portal.v1.PortalService.GetMediaAssetsByID:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
 	7,  // 116: coasterai.portal.v1.PortalService.GenerateMusic:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
-	83, // 117: coasterai.portal.v1.PortalService.CreateTemplate:output_type -> coasterai.core.v1.AnimationTemplate
-	83, // 118: coasterai.portal.v1.PortalService.GetTemplate:output_type -> coasterai.core.v1.AnimationTemplate
-	84, // 119: coasterai.portal.v1.PortalService.GetTemplates:output_type -> coasterai.portal.v1.GetTemplatesResponse
+	84, // 117: coasterai.portal.v1.PortalService.CreateTemplate:output_type -> coasterai.core.v1.AnimationTemplate
+	84, // 118: coasterai.portal.v1.PortalService.GetTemplate:output_type -> coasterai.core.v1.AnimationTemplate
+	85, // 119: coasterai.portal.v1.PortalService.GetTemplates:output_type -> coasterai.portal.v1.GetTemplatesResponse
 	75, // 120: coasterai.portal.v1.PortalService.SaveTemplate:output_type -> google.protobuf.Empty
 	75, // 121: coasterai.portal.v1.PortalService.DeleteTemplate:output_type -> google.protobuf.Empty
-	85, // 122: coasterai.portal.v1.PortalService.GenerateSuggestions:output_type -> coasterai.portal.v1.GenerateSuggestionsResponse
+	86, // 122: coasterai.portal.v1.PortalService.GenerateSuggestions:output_type -> coasterai.portal.v1.GenerateSuggestionsResponse
 	14, // 123: coasterai.portal.v1.PortalService.RenderSuggestion:output_type -> coasterai.portal.v1.SuggestScenesResponse
-	86, // 124: coasterai.portal.v1.PortalService.GenerateVoiceover:output_type -> coasterai.core.v1.Voiceover
-	87, // 125: coasterai.portal.v1.PortalService.GetCredits:output_type -> coasterai.core.v1.GetCreditsResponse
+	87, // 124: coasterai.portal.v1.PortalService.GenerateVoiceover:output_type -> coasterai.core.v1.Voiceover
+	88, // 125: coasterai.portal.v1.PortalService.GetCredits:output_type -> coasterai.core.v1.GetCreditsResponse
 	86, // [86:126] is the sub-list for method output_type
 	46, // [46:86] is the sub-list for method input_type
 	46, // [46:46] is the sub-list for extension type_name

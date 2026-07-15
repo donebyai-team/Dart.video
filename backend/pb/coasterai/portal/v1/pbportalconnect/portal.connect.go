@@ -231,7 +231,7 @@ type PortalServiceClient interface {
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest]) (*connect.ServerStreamForClient[v1.GenerateOrEditSceneResponse], error)
 	GetConversationHistory(context.Context, *connect.Request[v1.ConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
 	// Assets
-	UpdateCode(context.Context, *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.MediaAsset], error)
+	UpdateCode(context.Context, *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.CodeRegistry], error)
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error)
@@ -422,7 +422,7 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGetConversationHistoryMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		updateCode: connect.NewClient[v1.UpdateCodeRequest, v11.MediaAsset](
+		updateCode: connect.NewClient[v1.UpdateCodeRequest, v11.CodeRegistry](
 			httpClient,
 			baseURL+PortalServiceUpdateCodeProcedure,
 			connect.WithSchema(portalServiceUpdateCodeMethodDescriptor),
@@ -532,7 +532,7 @@ type portalServiceClient struct {
 	updateBrandIdentity    *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
 	generateOrEditScene    *connect.Client[v1.GenerateOrEditSceneRequest, v1.GenerateOrEditSceneResponse]
 	getConversationHistory *connect.Client[v1.ConversationHistoryRequest, v1.GetConversationHistoryResponse]
-	updateCode             *connect.Client[v1.UpdateCodeRequest, v11.MediaAsset]
+	updateCode             *connect.Client[v1.UpdateCodeRequest, v11.CodeRegistry]
 	getMediaAssets         *connect.Client[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse]
 	getMediaAssetsByID     *connect.Client[v1.GetMediaAssetsByIDs, v1.GetMediaAssetsResponse]
 	generateMusic          *connect.Client[v1.VideoRequestWithID, v1.GetMediaAssetsResponse]
@@ -683,7 +683,7 @@ func (c *portalServiceClient) GetConversationHistory(ctx context.Context, req *c
 }
 
 // UpdateCode calls coasterai.portal.v1.PortalService.UpdateCode.
-func (c *portalServiceClient) UpdateCode(ctx context.Context, req *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.MediaAsset], error) {
+func (c *portalServiceClient) UpdateCode(ctx context.Context, req *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.CodeRegistry], error) {
 	return c.updateCode.CallUnary(ctx, req)
 }
 
@@ -781,7 +781,7 @@ type PortalServiceHandler interface {
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest], *connect.ServerStream[v1.GenerateOrEditSceneResponse]) error
 	GetConversationHistory(context.Context, *connect.Request[v1.ConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
 	// Assets
-	UpdateCode(context.Context, *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.MediaAsset], error)
+	UpdateCode(context.Context, *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.CodeRegistry], error)
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error)
@@ -1245,7 +1245,7 @@ func (UnimplementedPortalServiceHandler) GetConversationHistory(context.Context,
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetConversationHistory is not implemented"))
 }
 
-func (UnimplementedPortalServiceHandler) UpdateCode(context.Context, *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.MediaAsset], error) {
+func (UnimplementedPortalServiceHandler) UpdateCode(context.Context, *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.CodeRegistry], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.UpdateCode is not implemented"))
 }
 
