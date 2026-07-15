@@ -4,8 +4,8 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { MediaAsset, MediaAssetSchema, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
-import type { Section, Slide } from "../../core/v1/slide_pb";
+import type { MediaAsset, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
+import type { CodeRegistrySchema, Section, Slide } from "../../core/v1/slide_pb";
 import type { AIModel, ConversationMessage } from "../../core/v1/chat_pb";
 import type { AnimationCategory, AnimationTemplateSchema } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
@@ -1690,7 +1690,7 @@ export declare const PortalService: GenService<{
   updateCode: {
     methodKind: "unary";
     input: typeof UpdateCodeRequestSchema;
-    output: typeof MediaAssetSchema;
+    output: typeof CodeRegistrySchema;
   },
   /**
    * @generated from rpc coasterai.portal.v1.PortalService.GetMediaAssets

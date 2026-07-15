@@ -57,7 +57,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
     try {
       setIsSaving(true)
 
-      const asset = await portalClient.updateCode({
+      const codeRegistry = await portalClient.updateCode({
         slideId,
         code,
       })
@@ -65,8 +65,9 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
       updateSlideContent({
         codeRegistry: {
           ...animationContent?.codeRegistry,
-          mUrl: asset.url,
+          mUrl: codeRegistry.mUrl,
           code: '',
+          defaults: codeRegistry.defaults,
         },
       })
 

@@ -98,7 +98,7 @@ type PortalServiceClient interface {
 	GenerateOrEditScene(ctx context.Context, in *GenerateOrEditSceneRequest, opts ...grpc.CallOption) (PortalService_GenerateOrEditSceneClient, error)
 	GetConversationHistory(ctx context.Context, in *ConversationHistoryRequest, opts ...grpc.CallOption) (*GetConversationHistoryResponse, error)
 	// Assets
-	UpdateCode(ctx context.Context, in *UpdateCodeRequest, opts ...grpc.CallOption) (*v1.MediaAsset, error)
+	UpdateCode(ctx context.Context, in *UpdateCodeRequest, opts ...grpc.CallOption) (*v1.CodeRegistry, error)
 	GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(ctx context.Context, in *GetMediaAssetsByIDs, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GenerateMusic(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
@@ -458,8 +458,8 @@ func (c *portalServiceClient) GetConversationHistory(ctx context.Context, in *Co
 	return out, nil
 }
 
-func (c *portalServiceClient) UpdateCode(ctx context.Context, in *UpdateCodeRequest, opts ...grpc.CallOption) (*v1.MediaAsset, error) {
-	out := new(v1.MediaAsset)
+func (c *portalServiceClient) UpdateCode(ctx context.Context, in *UpdateCodeRequest, opts ...grpc.CallOption) (*v1.CodeRegistry, error) {
+	out := new(v1.CodeRegistry)
 	err := c.cc.Invoke(ctx, PortalService_UpdateCode_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -602,7 +602,7 @@ type PortalServiceServer interface {
 	GenerateOrEditScene(*GenerateOrEditSceneRequest, PortalService_GenerateOrEditSceneServer) error
 	GetConversationHistory(context.Context, *ConversationHistoryRequest) (*GetConversationHistoryResponse, error)
 	// Assets
-	UpdateCode(context.Context, *UpdateCodeRequest) (*v1.MediaAsset, error)
+	UpdateCode(context.Context, *UpdateCodeRequest) (*v1.CodeRegistry, error)
 	GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(context.Context, *GetMediaAssetsByIDs) (*GetMediaAssetsResponse, error)
 	GenerateMusic(context.Context, *VideoRequestWithID) (*GetMediaAssetsResponse, error)
@@ -705,7 +705,7 @@ func (UnimplementedPortalServiceServer) GenerateOrEditScene(*GenerateOrEditScene
 func (UnimplementedPortalServiceServer) GetConversationHistory(context.Context, *ConversationHistoryRequest) (*GetConversationHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConversationHistory not implemented")
 }
-func (UnimplementedPortalServiceServer) UpdateCode(context.Context, *UpdateCodeRequest) (*v1.MediaAsset, error) {
+func (UnimplementedPortalServiceServer) UpdateCode(context.Context, *UpdateCodeRequest) (*v1.CodeRegistry, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCode not implemented")
 }
 func (UnimplementedPortalServiceServer) GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error) {

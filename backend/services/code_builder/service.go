@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/shank318/coasterai/baml_client/types"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/structpb"
+	"time"
 
 	"strings"
 )
@@ -85,7 +85,7 @@ func (s *codeBuilderService) ValidateAndBuild(
 		return nil, fmt.Errorf("output_path is required")
 	}
 
-	input.OutputPath = fmt.Sprintf("%s/%s", input.OutputPath, uuid.New().String())
+	input.OutputPath = fmt.Sprintf("%s/%d", input.OutputPath, time.Now().Unix())
 
 	//if buildErr := staticValidateCode(input.Animation.Code); buildErr != nil {
 	//	return nil, buildErr
@@ -96,7 +96,9 @@ func (s *codeBuilderService) ValidateAndBuild(
 	// Sanitize
 	code = PostProcess(code)
 	// Resolve media assets
-	code = input.MediaAssetRegistry.ResolveMediaHandles(code)
+	if input.MediaAssetRegistry != nil {
+		code = input.MediaAssetRegistry.ResolveMediaHandles(code)
+	}
 
 	// TODO: Build and Validate code here, before extraction
 
