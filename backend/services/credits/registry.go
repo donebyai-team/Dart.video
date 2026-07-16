@@ -84,8 +84,8 @@ var actionRegistry = map[Action]ActionConfig{
 		ChargeEnabled:    true,
 	},
 	ActionCategorizeScene: {
-		EstimatedCredits: 1 * DefaultMultiplier,
-		Multiplier:       DefaultMultiplier,
+		EstimatedCredits: 1 * 1,
+		Multiplier:       1,
 		ChargeEnabled:    true,
 	},
 	ActionVoiceGeneration: {
@@ -94,13 +94,13 @@ var actionRegistry = map[Action]ActionConfig{
 		ChargeEnabled:    true,
 	},
 	ActionAnalyzeImage: {
-		EstimatedCredits: 1 * DefaultMultiplier,
-		Multiplier:       DefaultMultiplier,
+		EstimatedCredits: 1 * 1,
+		Multiplier:       1, // as the cost is very low, we can afford to charge for it
 		ChargeEnabled:    true,
 	},
 	ActionExtractTemplateConfig: {
-		EstimatedCredits: 1 * DefaultMultiplier,
-		Multiplier:       DefaultMultiplier,
+		EstimatedCredits: 1 * 2,
+		Multiplier:       2,
 		ChargeEnabled:    true,
 	},
 }
@@ -112,7 +112,7 @@ func pricingKey(provider, model string) string {
 	if provider == "openai-responses" {
 		provider = "openai"
 	}
-	
+
 	if provider == "google-ai" {
 		provider = "google"
 	}

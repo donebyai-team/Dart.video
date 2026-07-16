@@ -138,7 +138,7 @@ func (l *ProviderGoogle) chargeUsage(ctx context.Context, usageMeta *genai.Gener
 	input := creditsvc.ChargeCreditsInput{
 		Provider: l.GetName(),
 		Model:    modelName,
-		Usage:    processTokenUsage(usageMeta),
+		Usage:    ProcessGeminiUsage(usageMeta),
 		Action:   creditsvc.ActionVoiceGeneration,
 	}
 
@@ -147,22 +147,16 @@ func (l *ProviderGoogle) chargeUsage(ctx context.Context, usageMeta *genai.Gener
 	}
 }
 
-func processTokenUsage(meta *genai.GenerateContentResponseUsageMetadata) creditsvc.Usage {
+func ProcessGeminiUsage(meta *genai.GenerateContentResponseUsageMetadata) creditsvc.Usage {
+	if meta == nil {
+		return nil
+	}
 
-	// 1. Input/Prompt Tokens (Includes cached tokens)
 	inputTokens := meta.PromptTokenCount
-
-	// 2. Cached Input Tokens (Tokens pulled from pre-existing context cache)
 	cachedTokens := meta.CachedContentTokenCount
-
-	// 3. True Billed Input Tokens (The remaining newly processed input tokens)
 	billedInputTokens := inputTokens - cachedTokens
-
-	// 4. Output/Generation Tokens
-	outputTokens := meta.CandidatesTokenCount
-
-	// 5. Reasoning/Thought Tokens (For models like Gemini 2.0 Flash Thinking / Gemini 2.5 Pro)
-	//thoughtTokens := meta.ThoughtsTokenCount
+	outputTokens := meta.CandidatesTokenCount + meta.ThoughtsTokenCount
 
 	return creditsvc.NewUsage(int64(billedInputTokens), int64(outputTokens), int64(cachedTokens))
+
 }

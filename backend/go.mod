@@ -53,12 +53,13 @@ require (
 	cloud.google.com/go/storage v1.50.0
 	github.com/abema/go-mp4 v1.5.0
 	github.com/agnivade/levenshtein v1.2.1
-	github.com/boundaryml/baml v0.222.0
+	github.com/boundaryml/baml v0.223.0
 	github.com/google/cel-go v0.28.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/streamingfast/dstore v0.1.2
 	github.com/titanous/json5 v1.0.0
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
+	google.golang.org/genai v1.62.0
 )
 
 require (
@@ -162,7 +163,6 @@ require (
 	golang.org/x/telemetry v0.0.0-20251008203120-078029d740a8 // indirect
 	golang.org/x/tools v0.38.0 // indirect
 	golang.org/x/tools/cmd/cover v0.1.0-deprecated // indirect
-	google.golang.org/genai v1.62.0 // indirect
 )
 
 require (
