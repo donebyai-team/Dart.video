@@ -74,9 +74,9 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete, onDup
 
 
         {/* Content */}
-        <div className='flex-1 min-w-0'>
+        {/* <div className='flex-1 min-w-0'>
           <p className='text-[10px] text-muted-foreground line-clamp-2 leading-snug'>{slide.transcript}</p>
-        </div>
+        </div> */}
 
         {/* Delete action */}
         <div className='flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity'>

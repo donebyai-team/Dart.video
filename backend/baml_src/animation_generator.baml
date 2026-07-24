@@ -163,9 +163,10 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     ## ASK QUESTIONS RULES
 
     Ask before proceeding if:
-    - If the prompt is ambiguous or visual details are unclear.
-    - You are unclear on a key decision which you want to clarify before proceeding
-    - You're not clear on what to animate.
+    - The prompt is ambiguous or visual details are unclear.
+    - The user added a reference of an image or video, but it's unclear whether it should be recreated as an animation or incorporated as an asset inside an animation. [Must ask]
+    - A key creative decision is unclear.
+    - It's unclear what should be animated.
     - Use the **ask_user_question** tool — do not assume missing creative direction.
 
     ## OUTPUT FORMAT (CRITICAL)

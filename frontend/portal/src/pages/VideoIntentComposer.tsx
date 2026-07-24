@@ -134,7 +134,6 @@ const VideoIntentComposer = () => {
   const [brandIdentities, setBrandIdentities] = useState<BrandIdentity[]>([])
   const [isLoadingBrands, setIsLoadingBrands] = useState(true)
   const [brandWebsiteUrl, setBrandWebsiteUrl] = useState('')
-  const [showBrandOnboarding, setShowBrandOnboarding] = useState(false)
   const [quickStartMode, setQuickStartMode] = useState<QuickStartMode | null>(null)
   const [composerWebsiteUrl, setComposerWebsiteUrl] = useState('')
   const [attachedWebsiteUrls, setAttachedWebsiteUrls] = useState<string[]>([])
@@ -234,11 +233,6 @@ const VideoIntentComposer = () => {
       setQuickStartMode(null)
     }
   }, [hasBrandIdentity, quickStartMode])
-
-  useEffect(() => {
-    if (isLoadingBrands) return
-    setShowBrandOnboarding(!hasBrandIdentity)
-  }, [hasBrandIdentity, isLoadingBrands])
 
   const consumePlanningStream = async (stream: AsyncIterable<CreateVideoResponse>, signal?: AbortSignal, streamSession?: number) => {
     for await (const event of stream) {
@@ -610,228 +604,181 @@ const VideoIntentComposer = () => {
             </p>
           </div>
 
-          {stage === 'compose' && showBrandOnboarding ? (
-            <div className='mx-auto mt-10 flex w-full max-w-2xl justify-center pt-2'>
-              <Card className='w-full border-border/70 shadow-sm'>
-                <CardContent className='p-6'>
-                  <div className='mb-4 flex items-center gap-3'>
-                    <div className='flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground'>
-                      1
-                    </div>
-                    <p className='text-base font-semibold'>Match your brand automatically</p>
-                  </div>
+          <div className="mx-auto mt-8 w-full space-y-3 pt-2">
+            <div className="grid gap-2.5 md:grid-cols-3">
+              <button
+                type="button"
+                onClick={() => handleQuickStart("website")}
+                className="group flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 text-left transition-all hover:border-foreground/15 hover:bg-muted/20"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
+                  <Globe className="h-4 w-4" />
+                </div>
 
-                  <p className='mb-4 text-sm text-muted-foreground'>
-                    Add your company website and Dart will pull your colors, fonts, and logo into every video. You can refine this later.
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium leading-tight">
+                    Start with website
                   </p>
 
-                  <div className='space-y-3'>
-                    <Input
-                      type='url'
-                      value={brandWebsiteUrl}
-                      onChange={e => setBrandWebsiteUrl(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleBrandSetupSubmit()}
-                      placeholder='https://yourcompany.com'
-                    />
-
-                    <div className='flex gap-3'>
-                      <Button
-                        onClick={handleBrandSetupSubmit}
-                        disabled={!brandWebsiteUrl.trim()}
-                      >
-                        {brandWebsiteUrl.trim() ? 'Apply brand & continue' : 'Continue'}
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        onClick={() => setShowBrandOnboarding(false)}
-                      >
-                        Skip for now
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ) : stage === 'compose' && (
-
-            <div className="mx-auto mt-8 w-full space-y-3 pt-2">
-              <div className="grid gap-2.5 md:grid-cols-3">
-                <button
-                  type="button"
-                  onClick={() => handleQuickStart("website")}
-                  className="group flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 text-left transition-all hover:border-foreground/15 hover:bg-muted/20"
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
-                    <Globe className="h-4 w-4" />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium leading-tight">
-                      Start with website
-                    </p>
-
-                    <p className="mt-0.5 truncate text-xs leading-4 text-muted-foreground">
-                      Pull context from a URL.
-                    </p>
-                  </div>
-                </button>
-
-                {SHOW_FILE_UPLOAD_SHORTCUT && (
-                  <button
-                    type="button"
-                    onClick={() => handleQuickStart("file")}
-                    className="group flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 text-left transition-all hover:border-foreground/15 hover:bg-muted/20"
-                  >
-
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">
-                      <Upload className="h-4 w-4" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium leading-tight">
-                        Upload a file
-                      </p>
-
-                      <p className="mt-0.5 truncate text-xs leading-4 text-muted-foreground">
-                        PPT, PDF, DOCX
-                      </p>
-                    </div>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickStart("script")}
-                  className="group flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 text-left transition-all hover:border-foreground/15 hover:bg-muted/20"
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
-                    <FileText className="h-4 w-4" />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium leading-tight">
-                      Use script template
-                    </p>
-
-                    <p className="mt-0.5 truncate text-xs leading-4 text-muted-foreground">
-                      Start with a structured outline.
-                    </p>
-                  </div>
-                </button>
-                {demoVideoId && (
-                  <button
-                    onClick={() =>
-                      window.open(
-                        `/editor/${demoVideoId}`,
-                        "_blank",
-                        "noopener,noreferrer"
-                      )
-                    }
-                    className="flex w-full items-center gap-3 rounded-xl border border-border bg-muted/20 px-4 py-3 text-left transition-colors hover:bg-muted/40"
-                  >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                      <Clapperboard className="h-4 w-4" />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium">
-                        Explore a sample video
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        See what you can build with Dart.
-                      </p>
-                    </div>
-
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                )}
-              </div>
-
-              {quickStartMode === "website" && (
-                <div className="rounded-xl border border-border bg-muted/30 p-4">
-                  <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-                    <Globe className="h-4 w-4 text-primary" />
-                    Enter website URL
-                  </div>
-
-                  <div className="flex flex-col gap-2 md:flex-row">
-                    <Input
-                      type="url"
-                      value={composerWebsiteUrl}
-                      onChange={(e) => setComposerWebsiteUrl(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && handleAddWebsiteContext()
-                      }
-                      placeholder="https://yourcompany.com"
-                      className="md:flex-1"
-                    />
-
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={handleAddWebsiteContext}
-                        disabled={!composerWebsiteUrl.trim()}
-                      >
-                        Add URL
-                      </Button>
-
-                      <Button
-                        variant="ghost"
-                        onClick={() => setQuickStartMode(null)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
+                  <p className="mt-0.5 truncate text-xs leading-4 text-muted-foreground">
+                    Pull context from a URL.
+                  </p>
                 </div>
+              </button>
+
+              {SHOW_FILE_UPLOAD_SHORTCUT && (
+                <button
+                  type="button"
+                  onClick={() => handleQuickStart("file")}
+                  className="group flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 text-left transition-all hover:border-foreground/15 hover:bg-muted/20"
+                >
+
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300">
+                    <Upload className="h-4 w-4" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium leading-tight">
+                      Upload a file
+                    </p>
+
+                    <p className="mt-0.5 truncate text-xs leading-4 text-muted-foreground">
+                      PPT, PDF, DOCX
+                    </p>
+                  </div>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => handleQuickStart("script")}
+                className="group flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 text-left transition-all hover:border-foreground/15 hover:bg-muted/20"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
+                  <FileText className="h-4 w-4" />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium leading-tight">
+                    Use script template
+                  </p>
+
+                  <p className="mt-0.5 truncate text-xs leading-4 text-muted-foreground">
+                    Start with a structured outline.
+                  </p>
+                </div>
+              </button>
+              {demoVideoId && (
+                <button
+                  onClick={() =>
+                    window.open(
+                      `/editor/${demoVideoId}`,
+                      "_blank",
+                      "noopener,noreferrer"
+                    )
+                  }
+                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-muted/20 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <Clapperboard className="h-4 w-4" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">
+                      Explore a sample video
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      See what you can build with Dart.
+                    </p>
+                  </div>
+
+                  <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                </button>
               )}
             </div>
-          )}
+
+            {quickStartMode === "website" && (
+              <div className="rounded-xl border border-border bg-muted/30 p-4">
+                <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+                  <Globe className="h-4 w-4 text-primary" />
+                  Enter website URL
+                </div>
+
+                <div className="flex flex-col gap-2 md:flex-row">
+                  <Input
+                    type="url"
+                    value={composerWebsiteUrl}
+                    onChange={(e) => setComposerWebsiteUrl(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleAddWebsiteContext()
+                    }
+                    placeholder="https://yourcompany.com"
+                    className="md:flex-1"
+                  />
+
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleAddWebsiteContext}
+                      disabled={!composerWebsiteUrl.trim()}
+                    >
+                      Add URL
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={() => setQuickStartMode(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
+      <div className='pb-6 space-y-2'>
 
-      {
-        !showBrandOnboarding && (
-          <div className='pb-6 space-y-2'>
+        {/* Thinking bar — appears above input when agent is active */}
+        {showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
 
-            {/* Thinking bar — appears above input when agent is active */}
-            {showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
+        {/* Question panel — appears above input when agent asks something */}
+        {stage === 'question' && activeQuestions.length > 0 && (
+          <QuestionPanel
+            questions={activeQuestions}
+            isSubmitting={isSubmitting}
+            onContinue={payload => void handleContinuePlanning(payload)}
+            selectedQuestionAssets={questionAssets}
+            onOpenAssetPicker={openAssetDialog}
+            onOpenSelectedAssetsDialog={() => setQuestionAssetsDialogOpen(true)}
+          />
+        )}
 
-            {/* Question panel — appears above input when agent asks something */}
-            {stage === 'question' && activeQuestions.length > 0 && (
-              <QuestionPanel
-                questions={activeQuestions}
-                isSubmitting={isSubmitting}
-                onContinue={payload => void handleContinuePlanning(payload)}
-                selectedQuestionAssets={questionAssets}
-                onOpenAssetPicker={openAssetDialog}
-                onOpenSelectedAssetsDialog={() => setQuestionAssetsDialogOpen(true)}
-              />
-            )}
+        {/* Main input card */}
+        <div className='rounded-2xl border bg-background shadow-sm overflow-hidden'>
 
-            {/* Main input card */}
-            <div className='rounded-2xl border bg-background shadow-sm overflow-hidden'>
+          {/* Toolbar row */}
+          <div className='flex items-center gap-1.5 px-4 pt-3 pb-2 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
+            <span className='flex items-center gap-1 flex-shrink-0'>
+              <Film className='w-4 h-4' />
+              <Select value={resolutionId} onValueChange={setResolutionId} disabled={stage !== 'compose'}>
+                <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {defaultEditorConfig.resolution.options.map(r => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.name} ({r.width}x{r.height})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </span>
 
-              {/* Toolbar row */}
-              <div className='flex items-center gap-1.5 px-4 pt-3 pb-2 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
-                <span className='flex items-center gap-1 flex-shrink-0'>
-                  <Film className='w-4 h-4' />
-                  <Select value={resolutionId} onValueChange={setResolutionId} disabled={stage !== 'compose'}>
-                    <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {defaultEditorConfig.resolution.options.map(r => (
-                        <SelectItem key={r.id} value={r.id}>
-                          {r.name} ({r.width}x{r.height})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </span>
+            <span className='text-border/60 mx-0.5'>·</span>
 
-                <span className='text-border/60 mx-0.5'>·</span>
-
-                {/* <DurationSelector
+            {/* <DurationSelector
               value={duration}
               onChange={setDuration}
               disabled={stage !== 'compose'}
@@ -839,132 +786,131 @@ const VideoIntentComposer = () => {
 
             <span className='text-border/60 mx-0.5'>·</span> */}
 
-                <LanguageSelector
-                  value={language}
-                  onChange={setLanguage}
-                  disabled={stage !== 'compose'}
-                />
+            <LanguageSelector
+              value={language}
+              onChange={setLanguage}
+              disabled={stage !== 'compose'}
+            />
 
-                <div className='flex-1' />
+            <div className='flex-1' />
 
-                {/* Add Style */}
-                {/* <StyleSelector
+            {/* Add Style */}
+            {/* <StyleSelector
               selectedStyle={selectedStyle}
               onOpenDialog={() => setStyleDialogOpen(true)}
               disabled={stage !== 'compose'}
             /> */}
 
-                {/* Add Brand Library */}
-                <BrandLibrarySelector
-                  selectedBrandLibraryId={selectedBrandLibraryId}
-                  onChange={setSelectedBrandLibraryId}
-                  onAddBrand={() => router.push('/dashboard/brand')}
-                  disabled={stage !== 'compose'}
-                />
-              </div>
+            {/* Add Brand Library */}
+            <BrandLibrarySelector
+              selectedBrandLibraryId={selectedBrandLibraryId}
+              onChange={setSelectedBrandLibraryId}
+              onAddBrand={() => router.push('/dashboard/brand')}
+              disabled={stage !== 'compose'}
+            />
+          </div>
 
-              {(attachedWebsiteUrls.length > 0 || hasSelectedAssets) && (
-                <div className='mx-4 mt-3 flex flex-wrap gap-2'>
-                  {attachedWebsiteUrls.map(url => (
-                    <div key={url} className='flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs text-foreground'>
-                      <Link2 className='h-3.5 w-3.5 text-muted-foreground' />
-                      <span className='max-w-[220px] truncate'>{url}</span>
-                      <button
-                        type='button'
-                        className='rounded p-0.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive'
-                        onClick={() => {
-                          const nextUrls = attachedWebsiteUrls.filter(currentUrl => currentUrl !== url)
-                          setAttachedWebsiteUrls(nextUrls)
-                          setPrompt(current => buildPromptWithReferenceUrls(current, nextUrls))
-                        }}
-                      >
-                        <X className='h-3.5 w-3.5' />
-                      </button>
-                    </div>
-                  ))}
+          {(attachedWebsiteUrls.length > 0 || hasSelectedAssets) && (
+            <div className='mx-4 mt-3 flex flex-wrap gap-2'>
+              {attachedWebsiteUrls.map(url => (
+                <div key={url} className='flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs text-foreground'>
+                  <Link2 className='h-3.5 w-3.5 text-muted-foreground' />
+                  <span className='max-w-[220px] truncate'>{url}</span>
+                  <button
+                    type='button'
+                    className='rounded p-0.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive'
+                    onClick={() => {
+                      const nextUrls = attachedWebsiteUrls.filter(currentUrl => currentUrl !== url)
+                      setAttachedWebsiteUrls(nextUrls)
+                      setPrompt(current => buildPromptWithReferenceUrls(current, nextUrls))
+                    }}
+                  >
+                    <X className='h-3.5 w-3.5' />
+                  </button>
+                </div>
+              ))}
 
-                  {hasSelectedAssets && (
-                    <div
-                      onClick={() => setSelectedAssetsDialogOpen(true)}
-                      className='flex cursor-pointer items-center justify-between rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
-                    >
-                      <div className='flex items-center gap-2 text-primary'>
-                        <span className='font-medium'>
-                          {selectedAssets.length} attached file{selectedAssets.length > 1 ? 's' : ''}
-                        </span>
-                      </div>
-                      <button
-                        onClick={e => {
-                          e.stopPropagation()
-                          setSelectedAssets([])
-                        }}
-                        className='ml-2 rounded p-0.5 hover:bg-destructive/10 hover:text-destructive'
-                        type='button'
-                      >
-                        <X className='w-3.5 h-3.5' />
-                      </button>
-                    </div>
-                  )}
+              {hasSelectedAssets && (
+                <div
+                  onClick={() => setSelectedAssetsDialogOpen(true)}
+                  className='flex cursor-pointer items-center justify-between rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
+                >
+                  <div className='flex items-center gap-2 text-primary'>
+                    <span className='font-medium'>
+                      {selectedAssets.length} attached file{selectedAssets.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation()
+                      setSelectedAssets([])
+                    }}
+                    className='ml-2 rounded p-0.5 hover:bg-destructive/10 hover:text-destructive'
+                    type='button'
+                  >
+                    <X className='w-3.5 h-3.5' />
+                  </button>
                 </div>
               )}
-
-              {/* Textarea */}
-              <textarea
-                value={prompt}
-                onChange={e => setPrompt(e.target.value)}
-                placeholder='What do you want to create? Start with a website, attach files, or use the script template above.'
-                rows={5}
-                className='w-full resize-none bg-transparent px-4 py-3 text-sm focus:outline-none placeholder:text-muted-foreground/60'
-                disabled={stage !== 'compose'}
-              />
-
-              {/* Action row */}
-              <div className='flex items-center justify-between px-4 pb-4'>
-                <div className='flex items-center gap-4 text-xs text-muted-foreground'>
-                  <button
-                    type='button'
-                    onClick={() => handleQuickStart('website')}
-                    className='inline-flex items-center gap-1.5 transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50'
-                    disabled={stage !== 'compose'}
-                  >
-                    <Globe className='h-3.5 w-3.5' />
-                    Add URL
-                  </button>
-                  <button
-                    type='button'
-                    onClick={openAssetDialog}
-                    className='inline-flex items-center gap-1.5 transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50'
-                    disabled={stage !== 'compose'}
-                  >
-                    <Paperclip className='h-3.5 w-3.5' />
-                    Attach
-                  </button>
-                </div>
-
-                {isSubmitting || stage === 'question' ? (
-                  <Button
-                    onClick={handleStop}
-                    variant='outline'
-                    size='sm'
-                    className='h-9 w-9 rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
-                  >
-                    <Square className='w-3.5 h-3.5 fill-current' />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleSubmit}
-                    size='sm'
-                    className='h-9 w-9 rounded-xl'
-                    disabled={!canGenerate || stage !== 'compose'}
-                  >
-                    <Sparkles className='w-4 h-4' />
-                  </Button>
-                )}
-              </div>
             </div>
+          )}
+
+          {/* Textarea */}
+          <textarea
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            placeholder='What do you want to create? Start with a website, attach files, or use the script template above.'
+            rows={5}
+            className='w-full resize-none bg-transparent px-4 py-3 text-sm focus:outline-none placeholder:text-muted-foreground/60'
+            disabled={stage !== 'compose'}
+          />
+
+          {/* Action row */}
+          <div className='flex items-center justify-between px-4 pb-4'>
+            <div className='flex items-center gap-4 text-xs text-muted-foreground'>
+              <button
+                type='button'
+                onClick={() => handleQuickStart('website')}
+                className='inline-flex items-center gap-1.5 transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50'
+                disabled={stage !== 'compose'}
+              >
+                <Globe className='h-3.5 w-3.5' />
+                Add URL
+              </button>
+              <button
+                type='button'
+                onClick={openAssetDialog}
+                className='inline-flex items-center gap-1.5 transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50'
+                disabled={stage !== 'compose'}
+              >
+                <Paperclip className='h-3.5 w-3.5' />
+                Attach
+              </button>
+            </div>
+
+            {isSubmitting || stage === 'question' ? (
+              <Button
+                onClick={handleStop}
+                variant='outline'
+                size='sm'
+                className='h-9 w-9 rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
+              >
+                <Square className='w-3.5 h-3.5 fill-current' />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSubmit}
+                size='sm'
+                className='h-9 w-9 rounded-xl'
+                disabled={!canGenerate || stage !== 'compose'}
+              >
+                <Sparkles className='w-4 h-4' />
+              </Button>
+            )}
           </div>
-        )
-      }
+        </div>
+      </div>
+
     </div >
   )
 }

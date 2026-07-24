@@ -233,13 +233,14 @@ const StoryboardSection = ({
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <button
+                                                        onClick={() => onAddSlide(slide.id, SlideType.ANIMATION)}
                                                         className="relative z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground mr-1"
                                                     >
                                                         <Plus className="w-3 h-3" />
                                                         Add scene
                                                     </button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="start" className="w-40 bg-popover">
+                                                {/* <DropdownMenuContent align="start" className="w-40 bg-popover">
                                                     <DropdownMenuItem onSelect={() => onAddSlide(slide.id, SlideType.ANIMATION)}>
                                                         <Clapperboard className="w-3.5 h-3.5 mr-2" />
                                                         Animation
@@ -250,7 +251,7 @@ const StoryboardSection = ({
                                                         </div>
                                                         Image/Video
                                                     </DropdownMenuItem>
-                                                </DropdownMenuContent>
+                                                </DropdownMenuContent> */}
                                             </DropdownMenu>
 
                                             {showTransition && (
@@ -285,9 +286,8 @@ const StoryboardSection = ({
 
                         <div
                             ref={setSectionEndRef}
-                            className={`rounded-md border border-dashed px-3 py-2 text-[10px] text-muted-foreground transition-colors ${
-                                isOverSectionEnd ? "border-primary bg-primary/5 text-primary" : "border-border/60"
-                            }`}
+                            className={`rounded-md border border-dashed px-3 py-2 text-[10px] text-muted-foreground transition-colors ${isOverSectionEnd ? "border-primary bg-primary/5 text-primary" : "border-border/60"
+                                }`}
                         >
                             {/* {section.slides.length === 0 ? "Drop scene here" : "Drop at end of section"} */}
                         </div>
