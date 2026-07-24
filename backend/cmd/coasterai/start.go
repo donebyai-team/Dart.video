@@ -184,7 +184,8 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 	}
 
 	creditService := credits.NewService(deps.DataStore, zlog)
-	authUsecase, err := services.NewAuthUsecase(cmd.Context(), authConfig, deps.DataStore, deps.AuthSigningKeyGetter, creditService, zlog)
+	videoService := services.NewVideoGeneration(deps.DataStore, zlog)
+	authUsecase, err := services.NewAuthUsecase(cmd.Context(), authConfig, deps.DataStore, deps.AuthSigningKeyGetter, creditService, videoService, zlog)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create auth usecase: %w", err)
 	}
@@ -206,7 +207,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		cacheStore,
 		authUsecase,
 		deps.DataStore,
-		services.NewVideoGeneration(deps.DataStore, zlog),
+		videoService,
 		videoRenderService,
 		brand_identity.NewBrandIdentityService(zlog, deps.DataStore, deps.MediaStore, fireCrawlClient),
 		code_builder.NewCodeBuilderService(deps.MediaStore, zlog),

@@ -2712,6 +2712,7 @@ func (x *Organization) GetCreatedAt() *timestamppb.Timestamp {
 
 type OrganizationFeatureFlags struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	DemoVideoId   string                 `protobuf:"bytes,1,opt,name=demoVideoId,proto3" json:"demoVideoId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2744,6 +2745,13 @@ func (x *OrganizationFeatureFlags) ProtoReflect() protoreflect.Message {
 // Deprecated: Use OrganizationFeatureFlags.ProtoReflect.Descriptor instead.
 func (*OrganizationFeatureFlags) Descriptor() ([]byte, []int) {
 	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *OrganizationFeatureFlags) GetDemoVideoId() string {
+	if x != nil {
+		return x.DemoVideoId
+	}
+	return ""
 }
 
 type Integration struct {
@@ -3477,8 +3485,9 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12R\n" +
 	"\rfeature_flags\x18\x03 \x01(\v2-.coasterai.portal.v1.OrganizationFeatureFlagsR\ffeatureFlags\x129\n" +
 	"\n" +
-	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x1a\n" +
-	"\x18OrganizationFeatureFlags\"\xcb\x02\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"<\n" +
+	"\x18OrganizationFeatureFlags\x12 \n" +
+	"\vdemoVideoId\x18\x01 \x01(\tR\vdemoVideoId\"\xcb\x02\n" +
 	"\vIntegration\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
 	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x128\n" +

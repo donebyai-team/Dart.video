@@ -18,25 +18,33 @@ import (
 )
 
 type AuthUsecase struct {
-	auth0         *auth0
-	db            datastore.Repository
-	signer        crypto.SigningKeyGetter
-	creditService credits.Service
-	logger        *zap.Logger
+	auth0           *auth0
+	db              datastore.Repository
+	videoGeneration VideoGeneration
+	signer          crypto.SigningKeyGetter
+	creditService   credits.Service
+	logger          *zap.Logger
 }
 
-func NewAuthUsecase(ctx context.Context, auth0Config *Auth0Config, db datastore.Repository, signingAPIKeyGetter crypto.SigningKeyGetter, creditService credits.Service, logger *zap.Logger) (*AuthUsecase, error) {
+func NewAuthUsecase(ctx context.Context,
+	auth0Config *Auth0Config,
+	db datastore.Repository,
+	signingAPIKeyGetter crypto.SigningKeyGetter,
+	creditService credits.Service,
+	videoGeneration VideoGeneration,
+	logger *zap.Logger) (*AuthUsecase, error) {
 	auth0, err := newAuth0(ctx, auth0Config, logger)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create auth0: %w", err)
 	}
 
 	return &AuthUsecase{
-		auth0:         auth0,
-		db:            db,
-		signer:        signingAPIKeyGetter,
-		logger:        logger,
-		creditService: creditService,
+		auth0:           auth0,
+		db:              db,
+		videoGeneration: videoGeneration,
+		signer:          signingAPIKeyGetter,
+		logger:          logger,
+		creditService:   creditService,
 	}, nil
 }
 func (a *AuthUsecase) StartPasswordless(ctx context.Context, email string, ip string) error {
@@ -142,10 +150,28 @@ func (a *AuthUsecase) createUserForEmail(ctx context.Context, email string, emai
 			return nil, fmt.Errorf("unable to create organization: %w", err)
 		}
 
+		// Create a demo video for the organization
+		video, err := a.videoGeneration.DuplicateVideo(ctx, org.ID, DartDemoVideoID)
+		if err != nil {
+			logger.Error("failed to duplicate video", zap.Error(err), zap.String("org_name", orgName))
+		}
+
+		if video != nil {
+			org.FeatureFlags.DemoVideoID = video.ID
+			err = a.db.UpdateOrganization(ctx, org)
+			if err != nil {
+				logger.Error("failed to update organization", zap.Error(err), zap.String("org_name", orgName))
+			} else {
+				logger.Info("video duplicated", zap.String("org_name", orgName), zap.String("video_id", DartDemoVideoID))
+			}
+		}
+
 		// GRANT INITIAL CREDITS
 		err = a.creditService.GrantInitialCredits(ctx, org.ID)
 		if err != nil {
 			logger.Error("failed to grant initial credits", zap.Error(err), zap.String("org_name", orgName))
+		} else {
+			logger.Info("initial credits granted", zap.String("org_name", orgName))
 		}
 	}
 

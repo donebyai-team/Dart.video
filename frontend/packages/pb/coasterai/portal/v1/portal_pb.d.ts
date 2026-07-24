@@ -1067,6 +1067,10 @@ export declare const OrganizationSchema: GenMessage<Organization>;
  * @generated from message coasterai.portal.v1.OrganizationFeatureFlags
  */
 export declare type OrganizationFeatureFlags = Message<"coasterai.portal.v1.OrganizationFeatureFlags"> & {
+  /**
+   * @generated from field: string demoVideoId = 1;
+   */
+  demoVideoId: string;
 };
 
 /**

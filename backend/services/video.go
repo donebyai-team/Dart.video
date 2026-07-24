@@ -23,6 +23,8 @@ type VideoGeneration interface {
 	DuplicateVideo(ctx context.Context, organizationID, videoID string) (*models.Video, error)
 }
 
+const DartDemoVideoID = "c73b7004-c17f-439a-a6ce-f1e4ea03b3d4"
+
 type VideoOptions struct {
 	IncludePending bool
 	Render         bool

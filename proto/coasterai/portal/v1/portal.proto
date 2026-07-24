@@ -337,7 +337,9 @@ message Organization {
   .google.protobuf.Timestamp created_at = 4;
 }
 
-message OrganizationFeatureFlags {}
+message OrganizationFeatureFlags {
+  string demoVideoId = 1;
+}
 
 message Integration {
   string id = 1;

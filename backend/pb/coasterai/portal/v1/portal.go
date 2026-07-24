@@ -33,7 +33,9 @@ func (u *User) FromModel(model *models.User, orgs []*models.Organization) *User 
 func (o *Organization) FromModel(model *models.Organization) *Organization {
 	o.Id = model.ID
 	o.Name = model.Name
-	o.FeatureFlags = &OrganizationFeatureFlags{}
+	o.FeatureFlags = &OrganizationFeatureFlags{
+		DemoVideoId: model.FeatureFlags.DemoVideoID,
+	}
 	o.CreatedAt = timestamppb.New(model.CreatedAt)
 	return o
 }
