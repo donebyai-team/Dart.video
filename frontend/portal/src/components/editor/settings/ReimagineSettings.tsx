@@ -57,9 +57,7 @@ const ReimagineSettings = ({
       getSlideWithBackground,
     })
   )
-  const [activeTab, setActiveTab] = useState<ReimagineTab>(() =>
-    selectedSlide?.content?.codeRegistry?.mUrl?.trim() ? reimagineTabs.GENERATE : reimagineTabs.SUGGESTIONS
-  )
+  const [activeTab, setActiveTab] = useState<ReimagineTab>(() =>  reimagineTabs.GENERATE)
   const [selectedDefaultTemplateId, setSelectedDefaultTemplateId] = useState<string | null>(null)
   const [selectedCategoryTemplateId, setSelectedCategoryTemplateId] = useState<string | null>(null)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
@@ -322,7 +320,7 @@ const ReimagineSettings = ({
           <TabsList className={`grid w-full ${showTemplatesTab ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {showTemplatesTab && <TabsTrigger value={reimagineTabs.TEMPLATES}>Templates</TabsTrigger>}
             <TabsTrigger value={reimagineTabs.SUGGESTIONS}>Suggestions</TabsTrigger>
-            <TabsTrigger value={reimagineTabs.GENERATE}>Generate New</TabsTrigger>
+            <TabsTrigger value={reimagineTabs.GENERATE}>Chat</TabsTrigger>
           </TabsList>
 
           <TabsContent value={reimagineTabs.SUGGESTIONS} className='mt-4'>

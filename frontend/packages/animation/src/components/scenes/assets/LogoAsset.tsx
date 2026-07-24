@@ -187,6 +187,7 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
                         height: '100%',
                         objectFit: resolvedObjectFit,
                         aspectRatio: intrinsicAspectRatio,
+                        ...restStyle,
                     }}
                 />
             </span>
