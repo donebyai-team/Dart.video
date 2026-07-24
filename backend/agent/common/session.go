@@ -96,6 +96,20 @@ func (a *session) Get(ctx context.Context) (*SessionContext, error) {
 	return &sessionCtx, nil
 }
 
+func (p *SessionContext) GetConsolidatedThinkingSummary() string {
+	thinkingSummary := ""
+	for _, message := range p.ConversationHistory {
+		if message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_THINKING {
+			thinkingSummary += message.Message + "\n"
+		}
+
+		if message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING {
+			thinkingSummary += message.Message + "\n"
+		}
+	}
+	return thinkingSummary
+}
+
 func (p *SessionContext) FilterAndGetConversation(isPlatformAdmin bool, includeAll bool, checkpoint string) ([]*pbcore.ConversationMessage, error) {
 	history := make([]*pbcore.ConversationMessage, len(p.ConversationHistory))
 	copy(history, p.ConversationHistory)

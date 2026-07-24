@@ -6,12 +6,17 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/shank318/coasterai/services"
 )
+
+type Scrapper interface {
+	Scrape(ctx context.Context, req ScrapeRequest) (*ScrapeResponse, error)
+}
 
 // BrandingResponse maps the firecrawl branding output structure
 type FontInfo struct {
@@ -54,6 +59,7 @@ type ScrapeRequest struct {
 	BlockAds        *bool    `json:"blockAds,omitempty"`
 	StoreInCache    *bool    `json:"storeInCache,omitempty"`
 	Timeout         *int     `json:"timeout,omitempty"`
+	RemoveLinks     bool     `json:"-"`
 }
 
 // ScrapeResponse models the important parts of the Firecrawl scrape response.
@@ -73,7 +79,8 @@ type FirecrawlClient struct {
 	httpClient *retryablehttp.Client
 }
 
-func NewFireCrawlClient(apiKey string) *FirecrawlClient {
+func NewFireCrawlClient(apiKey string) Scrapper {
+	//return NewMockScrapper()
 	if apiKey == "" {
 		panic("firecrawl api key is required")
 	}
@@ -148,6 +155,8 @@ func (c *FirecrawlClient) doRequest(ctx context.Context, method, path string, bo
 	}
 }
 
+var markdownImageRegex = regexp.MustCompile(`!\[[^\]]*\]\([^)]+\)`)
+
 func (c *FirecrawlClient) Scrape(ctx context.Context, req ScrapeRequest) (*ScrapeResponse, error) {
 	if req.URL == "" {
 		return nil, fmt.Errorf("scrape url is required")
@@ -183,6 +192,10 @@ func (c *FirecrawlClient) Scrape(ctx context.Context, req ScrapeRequest) (*Scrap
 		}
 
 		return nil, firecrawlErr
+	}
+
+	if parsed.Data.Markdown == "" && req.RemoveLinks {
+		parsed.Data.Markdown = markdownImageRegex.ReplaceAllString(parsed.Data.Markdown, "")
 	}
 
 	return &parsed, nil

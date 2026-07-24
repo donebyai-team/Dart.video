@@ -16,6 +16,7 @@ import (
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/templates"
+	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -124,7 +125,11 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 
 	// if script if approved, generate scenes
 	if options.Script != nil && userResponse == SCRIPT_CONFORMATION_RESPONSE {
-		return a.generateScenes(ctx, a.buildVideoGenerationPlanRequest(session.Request), options.Script)
+		return a.generateScenes(
+			ctx,
+			a.buildVideoGenerationPlanRequest(session.Request),
+			session.GetConsolidatedThinkingSummary(),
+			options.Script)
 	}
 
 	// else continue with changes
@@ -346,7 +351,9 @@ func (a *agentV2) runPlanningScript(
 
 func (a *agentV2) generateScenes(
 	ctx context.Context,
-	req types.VideoGenerationPlanRequest, script *pbcore.Script) (result *common.RunResult, retErr error) {
+	req types.VideoGenerationPlanRequest,
+	thinkingSofar string,
+	script *pbcore.Script) (result *common.RunResult, retErr error) {
 	if script == nil {
 		return nil, agenterrors.InvalidInput("script is required", nil)
 	}
@@ -429,6 +436,13 @@ func (a *agentV2) generateScenes(
 		if ctx.Err() != nil {
 			return nil, ctx.Err()
 		}
+
+		// append the thinking
+		summary := fmt.Sprintf("SCRIPT SUMMARY\n%s", thinkingSofar)
+		if llmResponse.Summary != nil && *llmResponse.Summary != "" {
+			summary += fmt.Sprintf("\n\nSCENE SUMMARY\n%s", *llmResponse.Summary)
+		}
+		llmResponse.Summary = utils.Ptr(summary)
 
 		return a.runApplyPlanAsync(ctx, llmResponse)
 	}
@@ -544,7 +558,6 @@ func (a *agentV2) applyPlan(
 	aiPlan *common.LLMResponse[types.GeneratedVideoPlan],
 	firstSlideReady chan<- struct{},
 ) (err error) {
-	// save config with pending items
 	builder := NewVideoConfigGenerator(a.logger, a.videoService).
 		Init(a.session.GetID(), aiPlan.Response.VideoName)
 	_, err = builder.CreatePendingSlidesV2(ctx, a.templateRegistry, aiPlan)

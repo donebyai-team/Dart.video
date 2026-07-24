@@ -4,7 +4,7 @@ import "strings"
 
 const (
 	DefaultMultiplier   = 5
-	DefaultFreeCredits  = 500 // 500 credits = 5$
+	DefaultFreeCredits  = 1000 // 10$
 	DefaultActionCharge = 10
 )
 
@@ -36,6 +36,13 @@ var providerPricingRegistry = map[string]Pricing{
 		InputCostPer1MTokens:  5,
 		OutputCostPer1MTokens: 30,
 		CachedCostPer1MTokens: 0.50,
+	},
+	pricingKey("openai", "gpt-5.6-luna"): {
+		Provider:              "openai",
+		Model:                 "gpt-5.6-sol",
+		InputCostPer1MTokens:  1,
+		OutputCostPer1MTokens: 6,
+		CachedCostPer1MTokens: 0.10,
 	},
 	pricingKey("openai", "gpt-5.5"): {
 		Provider:              "openai",

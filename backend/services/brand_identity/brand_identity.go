@@ -28,19 +28,19 @@ type BrandIdentity interface {
 	GetSupportedFonts(ctx context.Context, orgID string) []string
 	GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error)
 	GetBrandIdentity(ctx context.Context, ID string) (*models.BrandIdentity, error)
-	GetScrapingClient() *providers.FirecrawlClient
+	GetScrapingClient() providers.Scrapper
 }
 
 type brandIdentity struct {
 	db               datastore.Repository
 	logger           *zap.Logger
-	fireCrawlClient  *providers.FirecrawlClient
+	scrapper         providers.Scrapper
 	mediaStore       services.MediaStore
 	googleFontLoader fontLoader
 }
 
-func (b brandIdentity) GetScrapingClient() *providers.FirecrawlClient {
-	return b.fireCrawlClient
+func (b brandIdentity) GetScrapingClient() providers.Scrapper {
+	return b.scrapper
 }
 
 func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*models.BrandIdentity, error) {
@@ -69,11 +69,11 @@ func NewBrandIdentityService(
 	logger *zap.Logger,
 	db datastore.Repository,
 	mediaStore services.MediaStore,
-	fireCrawlClient *providers.FirecrawlClient) BrandIdentity {
+	scrapper providers.Scrapper) BrandIdentity {
 
 	return &brandIdentity{
 		db:               db,
-		fireCrawlClient:  fireCrawlClient,
+		scrapper:         scrapper,
 		mediaStore:       mediaStore,
 		logger:           logger,
 		googleFontLoader: newGoogleFontLoader(logger),
@@ -125,7 +125,7 @@ func (b brandIdentity) CreateBrandIdentity(ctx context.Context, orgID string, we
 		Timeout: &maxTimeout,
 	}
 
-	resp, err := b.fireCrawlClient.Scrape(ctx, req)
+	resp, err := b.scrapper.Scrape(ctx, req)
 	if err != nil {
 		return nil, err
 	}

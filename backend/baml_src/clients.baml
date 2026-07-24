@@ -42,6 +42,19 @@ client<llm> SmartBoyGPTSOL {
   }
 }
 
+client<llm> SmartBoyGPTLuna {
+  provider "openai-responses"
+  retry_policy Exponential
+  options {
+    model "gpt-5.6-luna"
+    api_key env.OPENAI_API_KEY
+    reasoning {
+      effort "medium"
+      summary "auto"
+    }
+  }
+}
+
 client<llm> CustomOpenAI55WithThinkingSummary {
   provider "openai-responses"
   retry_policy Exponential
@@ -53,15 +66,6 @@ client<llm> CustomOpenAI55WithThinkingSummary {
       effort "medium"
       summary "auto"
     }
-  }
-}
-
-// https://docs.boundaryml.com/docs/snippets/clients/retry
-retry_policy Constant {
-  max_retries 3
-  strategy {
-    type constant_delay
-    delay_ms 200
   }
 }
 

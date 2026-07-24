@@ -25,7 +25,7 @@ class GenerateScriptPlan {
 }
 
 function GenerateScript(input: ScriptPlannerRequest, conversation_history: Message[]) -> GenerateScriptPlan {
-  client SmartBoyGPTSOL
+  client SmartBoyGPTLuna
   prompt #"
     You are an expert video script strategist.
 
@@ -116,7 +116,7 @@ function GenerateScript(input: ScriptPlannerRequest, conversation_history: Messa
 
     ## INPUT
     Language: {{ input.Language }}
-    Video Duration: 30-45 second
+    Video Duration: 60 second
     {{ BrandGuidelines(input.VideoBranding) }}
 
     ### User provided prompt/script:

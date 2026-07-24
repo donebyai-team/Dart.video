@@ -16,18 +16,18 @@ import (
 )
 
 type ToolRegistry struct {
-	state           AgentStatusPublisher
-	session         AgentSession
-	logger          *zap.Logger
-	firecrawlClient *providers.FirecrawlClient
+	state    AgentStatusPublisher
+	session  AgentSession
+	logger   *zap.Logger
+	scrapper providers.Scrapper
 }
 
 func NewToolRegistry(
 	state AgentStatusPublisher,
 	session AgentSession,
-	firecrawlClient *providers.FirecrawlClient,
+	scrapper providers.Scrapper,
 	logger *zap.Logger) *ToolRegistry {
-	return &ToolRegistry{state: state, session: session, logger: logger, firecrawlClient: firecrawlClient}
+	return &ToolRegistry{state: state, session: session, logger: logger, scrapper: scrapper}
 }
 
 func (a *ToolRegistry) HandleScriptPlanner(ctx context.Context,
@@ -51,6 +51,20 @@ func (a *ToolRegistry) HandleScriptPlanner(ctx context.Context,
 				Narattion: scriptItem.Narration,
 			})
 		}
+
+		// store it as final thinking as it won't be used in the context
+		if llmResponse.Summary != nil && *llmResponse.Summary != "" {
+			session.AddMessage(&pbcore.ConversationMessage{
+				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING,
+				Message: *llmResponse.Summary,
+			})
+		}
+
+		if err := a.session.Save(ctx, session); err != nil {
+			a.logger.Error("failed to save planning session with tool call", zap.Error(err))
+		}
+
 		return &RunResult{
 			Status: RunStatusWaitingForUserInput,
 			AskUserQuestions: []*pbportal.AskUserQuestion{
@@ -100,7 +114,6 @@ func (a *ToolRegistry) handleExtractContent(
 	thinkingSummary *string,
 	assetRegistry *services.MediaAssetRegistry,
 ) (*RunResult, error) {
-
 	if thinkingSummary != nil && *thinkingSummary != "" {
 		session.AddMessage(&pbcore.ConversationMessage{
 			Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
@@ -124,12 +137,13 @@ func (a *ToolRegistry) handleExtractContent(
 			zap.String("link", link),
 		)
 
-		scrapeResponse, err := a.firecrawlClient.Scrape(ctx, providers.ScrapeRequest{
+		scrapeResponse, err := a.scrapper.Scrape(ctx, providers.ScrapeRequest{
 			URL:             link,
 			Formats:         []providers.Format{{"markdown"}},
 			OnlyMainContent: utils.Ptr(true),
 			Parsers:         []providers.Parser{{Type: "pdf", MaxPages: 5}},
 			RemoveBase64:    utils.Ptr(true),
+			RemoveLinks:     true,
 		})
 		if err != nil {
 			if errors.Is(err, providers.ErrUnsupportedWebsite) {
