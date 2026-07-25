@@ -144,10 +144,11 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 					slide.Transition = pbcore.TransitionType_TRANSITION_SLIDE_LEFT
 					slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
 					slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_LEFT.Enum()
-				} else {
-					slide.Transition = pbcore.TransitionType_TRANSITION_FADE
-					slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
 				}
+				//else {
+				//	slide.Transition = pbcore.TransitionType_TRANSITION_FADE
+				//	slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
+				//}
 
 				section.Slides = append(section.Slides, slide)
 				slideIndex++
