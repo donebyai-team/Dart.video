@@ -45,7 +45,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - Choose scenes based on how well they visually communicate each script segment.
     - Select scenes using visual and usage description and underlying script meaning.
     - *DO NOT repeat scenes.*
-    - *Use scenes tagged with TEXT to build up the storyline*
+    - *Scenes with Section: TEXT are text only animations, use it to build storyline or if a right visual scene is not available*
     - *DO NOT force-fit scenes. Use a scene only if it supports the script visually and contextually.*
     - If needed, divide/Split script text into scenes at logical sentence breaks. Do not split mid-sentence.
         **Good**
