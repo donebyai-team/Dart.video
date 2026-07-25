@@ -81,66 +81,6 @@ func (t *ThinkingExtractor) runEmitter() {
 	}
 }
 
-func (t *ThinkingExtractor) handleEvent(event Event) {
-
-	switch event.Type {
-
-	case EventThinkingStarted:
-
-		t.started = true
-
-		select {
-		case t.emitCh <- struct{}{}:
-		default:
-		}
-
-	case EventThinkingChunk:
-
-		if event.Text != "" {
-			t.finalSummary += event.Text
-		}
-
-		select {
-		case t.emitCh <- struct{}{}:
-		default:
-		}
-
-	case EventThinkingDone:
-
-		if t.doneProcessed {
-			return
-		}
-
-		t.doneProcessed = true
-		t.duration = event.Duration
-
-		if event.Text != "" {
-			t.finalSummary = event.Text
-		}
-
-		close(t.stopCh)
-
-		if t.onThinking != nil {
-
-			if t.duration < 60 {
-				t.onThinking(
-					fmt.Sprintf(
-						"Thought for %.2fs...",
-						t.duration,
-					),
-				)
-			} else {
-				t.onThinking(
-					fmt.Sprintf(
-						"Thought for %.2fm...",
-						t.duration/60,
-					),
-				)
-			}
-		}
-	}
-}
-
 func (t *ThinkingExtractor) HandleTick(
 	ctx context.Context,
 	reason baml.TickReason,
@@ -206,7 +146,7 @@ func (t *ThinkingExtractor) HandleTick(
 			case EventThinkingChunk:
 
 				if event.Text != "" {
-					t.finalSummary += event.Text
+					t.finalSummary += event.Text + "\n\n"
 				}
 
 				select {
@@ -224,7 +164,7 @@ func (t *ThinkingExtractor) HandleTick(
 				t.duration = event.Duration
 
 				// OpenAI provides the final reasoning summary
-				if event.Text != "" {
+				if t.finalSummary == "" || t.finalSummary == "\n\n" || len(t.finalSummary) < len(event.Text) {
 					t.finalSummary = event.Text
 				}
 

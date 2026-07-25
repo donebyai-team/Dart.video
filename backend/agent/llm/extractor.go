@@ -46,6 +46,30 @@ func (e *OpenAIExtractor) ProcessChunk(
 			},
 		}, nil
 
+	case "response.reasoning_summary_part.done":
+
+		part, ok := data["part"].(map[string]interface{})
+		if !ok {
+			return nil, nil
+		}
+
+		itemType, _ := part["type"].(string)
+		if itemType != "summary_text" {
+			return nil, nil
+		}
+
+		summary := ""
+		if text, ok := part["text"].(string); ok {
+			summary = text
+		}
+
+		return []Event{
+			{
+				Type: EventThinkingChunk,
+				Text: summary,
+			},
+		}, nil
+
 	case "response.output_item.done":
 
 		if e.done {
@@ -62,8 +86,6 @@ func (e *OpenAIExtractor) ProcessChunk(
 			return nil, nil
 		}
 
-		e.done = true
-
 		var summary strings.Builder
 
 		if summaries, ok := item["summary"].([]interface{}); ok {
@@ -79,6 +101,11 @@ func (e *OpenAIExtractor) ProcessChunk(
 					summary.WriteString("\n\n")
 				}
 			}
+		}
+
+		// Don't make the LLM think it's done if it's empty.'
+		if summary.String() == "" {
+			return nil, nil
 		}
 
 		duration := 0.0

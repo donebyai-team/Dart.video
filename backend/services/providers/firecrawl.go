@@ -155,7 +155,7 @@ func (c *FirecrawlClient) doRequest(ctx context.Context, method, path string, bo
 	}
 }
 
-var markdownImageRegex = regexp.MustCompile(`!\[[^\]]*\]\([^)]+\)`)
+var markdownImageRegex = regexp.MustCompile(`!?\[[^]]*]\([^)]+\)`)
 
 func (c *FirecrawlClient) Scrape(ctx context.Context, req ScrapeRequest) (*ScrapeResponse, error) {
 	if req.URL == "" {
@@ -194,7 +194,7 @@ func (c *FirecrawlClient) Scrape(ctx context.Context, req ScrapeRequest) (*Scrap
 		return nil, firecrawlErr
 	}
 
-	if parsed.Data.Markdown == "" && req.RemoveLinks {
+	if req.RemoveLinks {
 		parsed.Data.Markdown = markdownImageRegex.ReplaceAllString(parsed.Data.Markdown, "")
 	}
 
