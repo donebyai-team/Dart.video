@@ -164,7 +164,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
 
     Ask before proceeding if:
     - The prompt is ambiguous or visual details are unclear.
-    - The user added a reference of an image or video, but it's unclear whether it should be recreated as an animation or incorporated as an asset inside an animation. [Must ask]
+    - The user provided a reference image or video, and it's unclear whether they want you to recreate it as an animation or incorporate it as an asset within the animation. **Must ask.** If the user explicitly says to animate, recreate, or otherwise animate the reference content, assume they want it recreated as an animation.
     - A key creative decision is unclear.
     - It's unclear what should be animated.
     - Use the **ask_user_question** tool — do not assume missing creative direction.
@@ -172,6 +172,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     ## OUTPUT FORMAT (CRITICAL)
 
      * Always return the **total frame count**, keeping it consistent with the scene timings and FPS. Avoid unnecessary idle or dead frames.
+     * If the animation includes one or more video MediaAssets, its **total frame count** must be at least the duration (in frames) of the longest attached video so every video can play in full.
      * If `manualEdits` are provided in follow-up requests, always return the updated `manualEdits` along with the updated code.
      * `manualEdits` reference code and elements by `elementId`. If a code change removes or renames an element so its ID no longer exists, remove the corresponding entry from `manualEdits`.
 

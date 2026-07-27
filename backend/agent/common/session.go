@@ -11,6 +11,7 @@ import (
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/datastore"
+	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
@@ -337,40 +338,50 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 			}
 		}
 
-		// References
+		// Reference assets are sent directly to the LLM as image/video inputs.
+		//
+		// Images are always treated as references.
+		// Videos are treated as references only when there is exactly one short (<=5s) video.
+		// Multiple short videos or any video longer than 5s are downgraded to attachments,
 		if len(item.ReferenceIds) > 0 {
 			mediaAssets, err := a.db.GetMediaAssetsByID(ctx, item.ReferenceIds)
 			if err != nil {
 				return nil, lastAIModel, fmt.Errorf("failed to get media assets: %w", err)
 			}
 
-			var imageCount, videoCount int
+			filteredAssetsTobeReferenced := make([]*models.MediaAsset, 0, len(mediaAssets))
+			referenceVideos := make([]*models.MediaAsset, 0)
 
 			for _, mediaAsset := range mediaAssets {
 				switch mediaAsset.MediaType {
 				case pbcore.MediaType_MEDIA_TYPE_IMAGE:
-					imageCount++
+					filteredAssetsTobeReferenced = append(filteredAssetsTobeReferenced, mediaAsset)
 
 				case pbcore.MediaType_MEDIA_TYPE_VIDEO:
-					videoCount++
-					hasReferenceVideo = true
-					if mediaAsset.Metadata.Duration == 0 || mediaAsset.Metadata.Duration > 5 {
-						return nil, lastAIModel, fmt.Errorf("maximum video duration allowed is 5 seconds")
+					if mediaAsset.Metadata.Duration == 0 {
+						return nil, lastAIModel, fmt.Errorf("invalid video metadata: duration is 0")
+					}
+
+					if mediaAsset.Metadata.Duration > 5 {
+						item.AssetIds = append(item.AssetIds, mediaAsset.ID)
+					} else {
+						// Allow videos up to 5s as references, but only if there's exactly one.
+						referenceVideos = append(referenceVideos, mediaAsset)
 					}
 				}
 			}
 
-			// Prevent mixing images + videos
-			//if imageCount > 0 && videoCount > 0 {
-			//	return nil, lastAIModel, fmt.Errorf("cannot add both image and video assets")
-			//}
-
-			// Allow only a single video
-			if videoCount > 1 {
-				return nil, lastAIModel, fmt.Errorf("only one video media asset is allowed")
+			// Only include the reference video if there is exactly one.
+			if len(referenceVideos) == 1 {
+				hasReferenceVideo = true
+				filteredAssetsTobeReferenced = append(filteredAssetsTobeReferenced, referenceVideos[0])
+			} else if len(referenceVideos) > 1 {
+				for _, video := range referenceVideos {
+					item.AssetIds = append(item.AssetIds, video.ID)
+				}
 			}
 
-			for _, mediaAsset := range mediaAssets {
+			for _, mediaAsset := range filteredAssetsTobeReferenced {
 				if mediaAsset.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
 					img, err := mediaAsset.ToImage()
 					if err != nil {
@@ -388,9 +399,11 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 				}
 			}
 
-			builderFromExisting := services.NewMediaAssetRegistryBuilderFromExisting(registry)
-			attachments := builderFromExisting.AddAndFormatAssets(mediaAssets)
-			message.Content += "\n\nReferences (already provided as image/video input, in the same order as listed below):\n\n" + *attachments
+			if len(filteredAssetsTobeReferenced) > 0 {
+				builderFromExisting := services.NewMediaAssetRegistryBuilderFromExisting(registry)
+				attachments := builderFromExisting.AddAndFormatAssets(filteredAssetsTobeReferenced)
+				message.Content += "\n\nReferences (already provided as image/video input, in the same order as listed below):\n\n" + *attachments
+			}
 		}
 
 		// Attachments
