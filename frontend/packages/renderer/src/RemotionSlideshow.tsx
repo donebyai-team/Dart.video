@@ -117,6 +117,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const metadata = videoConfig.metadata
   const sections = videoConfig.config.sections ?? []
   const backgroundAudioUrl = metadata?.bgAudio?.url ?? metadata?.backgroundAudioUrl
+
   // if external video object exist use it or assign zustand video object
   const allSlides = useMemo(() => sections.flatMap(section => section.slides), [sections])
   /**

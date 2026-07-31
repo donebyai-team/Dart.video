@@ -98,10 +98,16 @@ export function OverlayTracks({
                 isHighlighted={highlightedOverlays.has(overlayItem.overlayId)}
                 pixelsPerSecond={pixelsPerSecond}
                 onClick={() => {
-                  onSelectOverlay?.(overlayItem.overlayId, overlayItem.slideId)
+                  // Seek first so frameupdate fires and currentFrame is correct
+                  // before the selection triggers a re-render
                   if (onSeek) {                   
                     onSeek(overlayItem.startTime)
                   }
+                  // Delay selection until after the seek's frameupdate has fired,
+                  // so the zoom overlay passes the frame-range filter on re-render
+                  requestAnimationFrame(() => {
+                    onSelectOverlay?.(overlayItem.overlayId, overlayItem.slideId)
+                  })
                 }}
                 onHover={() => {}}
               />

@@ -19,6 +19,7 @@ import {
   calculateRealTotalFrames,
   getSlideEditPreviewFrame,
   getSlideVisualEndFrame,
+  getRealSlideStartFrame,
 } from "../frame_calculations";
 import { useVideoStore } from "@/stores/video";
 import Loading from "@/app/loading";
@@ -182,7 +183,25 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     }
   }, [selectedSlide, selectedSlideId, allSlides, fps, selectedEffectId, isTimelineDragging]);
 
-  // Called when user clicks a slide tile in the timeline.
+  // When a zoom effect is selected (e.g. just inserted or selected from tile),
+  // seek the playhead to the effect's start frame so it becomes visible on canvas.
+  useEffect(() => {
+    if (!selectedEffectId || !selectedSlide) return;
+    if (playerRef.current?.isPlaying()) return;
+
+    const zoom = selectedSlide.zooms?.find(z => z.id === selectedEffectId);
+    if (!zoom) return;
+
+    const slideStart = getRealSlideStartFrame(allSlides, selectedSlideId, fps);
+    const targetFrame = slideStart + (zoom.startFrame ?? 0);
+
+    // Only seek if the playhead is not already within the zoom's range
+    const current = currentFrame;
+    const zoomGlobalEnd = slideStart + (zoom.endFrame ?? zoom.startFrame ?? 0);
+    if (current >= targetFrame && current <= zoomGlobalEnd) return;
+
+    playerRef.current?.seekTo(targetFrame);
+  }, [selectedEffectId]);
   // Pauses playback and seeks to the visual end of the slide (last frame before transition).
   // Sets playFromSlideId so that pressing play restarts from the slide's beginning.
   const handleSlideSelect = useCallback((slideId: string) => {
