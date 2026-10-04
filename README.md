@@ -26,6 +26,31 @@ This gives us:
 
 ---
 
+## Demo
+
+<p align="center">
+  <video
+    src="https://github.com/user-attachments/assets/15073ba1-4dd1-4f97-b8f2-5cb1641f9c07"
+    width="200"
+    controls
+  ></video>
+</p>
+
+## Editor
+
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/bb915ba3-76df-4d52-81b1-9042cdfe53ed" width="600" /></td>
+    <td><img src="https://github.com/user-attachments/assets/9a4f33bb-2470-488a-a97a-7c5af9e2f7bc" width="600" /></td>
+  </tr>
+  <tr>
+    <td> <img src="https://github.com/user-attachments/assets/2126b28d-9fce-4c2b-9201-e992524e4827" width="600" /></td>
+    <td> <img src="https://github.com/user-attachments/assets/7e0994df-6d7a-4b29-9c48-33c8cf740a44" width="600" /></td>     
+  </tr>
+</table>
+
+
+
 # 🏗️ Architecture
 
 The overall pipeline looks like this:
