@@ -26,7 +26,7 @@ This gives us:
 
 ---
 
-## Demo
+## Demo Video Generated
 
 <p align="center">
   <video
