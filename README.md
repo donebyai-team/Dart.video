@@ -49,7 +49,9 @@ This gives us:
   </tr>
 </table>
 
+# 🎬 End-to-End Flow
 
+<img width="1919" height="820" alt="ChatGPT Image Oct 4, 2026, 03_21_29 PM" src="https://github.com/user-attachments/assets/5907828e-8a75-4edc-9cbc-66719229b04d" />
 
 # 🏗️ Architecture
 
@@ -107,74 +109,6 @@ Each scene has its own animation, props, assets and voiceover.
 
 This allows Dart to regenerate or modify only the part of the video that needs to change.
 
----
-
-# 🎬 End-to-End Flow
-
-### 1. User provides an input
-
-The input can be:
-
-* A script
-* A URL
-* A PDF
-* An image
-* A video reference
-* A description of what they want to create
-
-### 2. Generate the script
-
-AI converts the input into a structured script.
-
-If more information is needed, the AI can ask questions using the `ask_question` tool and continue the conversation until it has enough context.
-
-The resulting script is broken down into individual scenes.
-
-### 3. User reviews the script
-
-The user can edit, remove, reorder or approve scenes before animation generation starts.
-
-### 4. Find templates for each scene
-
-For every scene, Dart searches the template library using similarity search.
-
-Relevant templates are provided to the AI together with the original scene/script.
-
-This gives the AI a starting point instead of asking it to invent every animation from scratch.
-
-### 5. Generate the animation
-
-AI generates React code using Dart's predefined animation primitives.
-
-The result includes:
-
-* Animation
-* Props
-* Assets
-* Voiceover
-* Scene configuration
-
-### 6. Edit in the interactive editor
-
-The generated animation is immediately rendered in the editor.
-
-Users can:
-
-* Change text
-* Change colors
-* Replace images
-* Replace logos
-* Move elements
-* Adjust animation properties
-* Add/remove scenes
-* Reorder scenes
-* Ask AI to modify the scene
-
-Manual edits are preserved and sent back to AI when further AI edits are requested.
-
-### 7. Export
-
-Once the video is ready, Dart triggers a GCP rendering job that combines the scenes into the final MP4.
 
 ---
 
@@ -451,6 +385,7 @@ Dart currently uses:
 * Next.js / React
 * Tailwind CSS
 * Material UI
+* Remotion for video editor
 
 ### Authentication & APIs
 
